@@ -1,0 +1,150 @@
+body{
+	margin: 0;
+}
+h1, h2, p{
+	text-align: center;
+}
+.sample_02{
+	width:95%;
+	border-collapse: separate;
+	border-spacing: 0px;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	margin: auto;
+}
+.sample_02 th{
+	/*width: 17%;*/
+	padding: 4px;
+	text-align: center;
+	vertical-align: top;
+	color: #444;
+	background-color: #ccc;
+	border-top: 1px solid #fff;
+	border-left: 1px solid #fff;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+.sample_02 td{
+	text-align: center;
+	padding: 4px;
+	/*background-color: #fafafa;*/
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+input#submit_button {
+	padding: 15px 40px;
+	font-size: 1.2em;
+	background-color: #000;
+	color: #fff;
+	border-style: none;
+	cursor: pointer;
+}
+
+			/*パン屑*/
+			#breadcrumbs-one{
+			  background: #eee;
+			  border-width: 1px;
+			  border-style: solid;
+			  border-color: #f5f5f5 #e5e5e5 #ccc;
+			  border-radius: 5px;
+			  box-shadow: 0 0 2px rgba(0,0,0,.2);
+			  overflow: hidden;
+			  /*width: 100%;*/
+			  margin: 0;
+			}
+			#breadcrumbs-one li{
+			  float: left;
+			}
+			#breadcrumbs-one a{
+			  padding: .7em 1em .7em 2em;
+			  float: left;
+			  text-decoration: none;
+			  color: #444;
+			  position: relative;
+			  text-shadow: 0 1px 0 rgba(255,255,255,.5);
+			  background-color: #ddd;
+			  background-image: linear-gradient(to right, #f5f5f5, #ddd);
+			  cursor: default;
+			}
+			#breadcrumbs-one li:first-child a{
+			  padding-left: 1em;
+			  border-radius: 5px 0 0 5px;
+			}
+			/*
+			#breadcrumbs-one a:hover{
+			  background: #fff;
+			}
+			*/
+			#breadcrumbs-one a::after,
+			#breadcrumbs-one a::before{
+			  content: "";
+			  position: absolute;
+			  top: 50%;
+			  margin-top: -1.5em;   
+			  border-top: 1.5em solid transparent;
+			  border-bottom: 1.5em solid transparent;
+			  border-left: 1em solid;
+			  right: -1em;
+			}
+			#breadcrumbs-one a::after{ 
+			  z-index: 2;
+			  border-left-color: #fff;
+			}
+			#breadcrumbs-one a::before{
+			  border-left-color: #ccc;  
+			  right: -1.1em;
+			  z-index: 1; 
+			}
+			#breadcrumbs-one a:hover::after{
+			  border-left-color: #fff;
+			}
+			
+
+			/*radio button*/
+			.radiobox input {
+				display: none;
+			}
+			.radiobox label{
+				display: block;
+				float: left;
+				cursor: pointer;
+				width: 200px;
+				margin: 0;
+				padding: 10px;
+				background: #bdc3c7;
+				color: #869198;
+				font-size: 16px;
+				text-align: center;
+				line-height: 1;
+				transition: .2s;
+			}
+			.radiobox label:first-of-type{
+				border-radius: 3px 0 0 3px;
+			}
+			.radiobox label:last-of-type{
+				border-radius: 0 3px 3px 0;
+			}
+			.radiobox input[type="radio"]:checked + .switch-on {
+				background-color: #a1b91d;
+				color: #fff;
+			}
+			.radiobox input[type="radio"]:checked + .switch-off {
+				background-color: #e67168;
+				color: #fff;
+			}
+			
+
+/*input number*/
+input[type='number'], input[type='date']{
+	border:0;
+	padding:10px;
+	font-size:1.2em;
+	font-family:Arial, sans-serif;
+	color:#aaa;
+	border:solid 1px #ccc;
+	margin:0 0 20px;
+	width:30%;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
