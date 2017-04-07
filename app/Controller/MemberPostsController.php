@@ -7,5 +7,10 @@
  */
 class MemberPostsController extends AppController {
 	var $scaffold;
-
+	#共通スクリプト
+	public function beforeFilter(){
+		parent::beforeFilter();
+		#ページタイトル設定
+		$this->set('title_for_layout', '寿し和 | 管理システム');
+	}
 }

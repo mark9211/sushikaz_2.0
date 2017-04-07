@@ -6,10 +6,6 @@
  * Time: 3:44
  */
 class LocationsController extends AppController{
-	#フォームヘルパー
-	public $helpers = array('Html', 'Form');
-	#Cookieの使用
-	var $components = array('Cookie');
 
 	#共通スクリプト
 	public function beforeFilter(){

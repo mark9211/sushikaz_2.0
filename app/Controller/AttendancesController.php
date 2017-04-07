@@ -6,19 +6,12 @@
  * Time: 16:01
  */
 class AttendancesController extends AppController{
-	#フォームヘルパー
-	public $helpers = array('Html', 'Form');
-	#Cookieの使用
-	var $components = array('Cookie');
 
 	#共通スクリプト
 	public function beforeFilter(){
 		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', 'タイムカード | 寿し和');
-		#共通使用モデル
-		$this->loadModel("Member");
-		$this->loadModel("Location");
 		#ログイン処理
 		if(!$this->Cookie->check('myData')){
 			#loginページへ

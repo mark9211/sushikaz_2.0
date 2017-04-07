@@ -6,10 +6,6 @@
  * Time: 15:30
  */
 class AccountTypesController extends AppController {
-	#フォームヘルパー
-	public $helpers = array('Html', 'Form');
-	#Cookieの使用
-	var $components = array('Cookie');
 	#scaffold
 	var $scaffold;
 
@@ -18,9 +14,6 @@ class AccountTypesController extends AppController {
 		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', '買掛支出先設定 | 寿し和');
-		#共通使用モデル
-		$this->loadModel("Location");
-		$this->loadModel("AccountType");
 		if(!$this->Cookie->check('myData')){
 			#loginページへ
 			$this->redirect(array('controller'=>'locations','action'=>'login'));

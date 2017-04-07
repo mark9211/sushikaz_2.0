@@ -31,12 +31,21 @@ App::uses('Controller', 'Controller');
  * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
-	var $components = array('DebugKit.Toolbar', 'Session', 'Cookie'); // この行を追加
+	# ヘルパー
+	public $helpers = array('Html', 'Form');
+	# コンポーネンツ
+	var $components = array('DebugKit.Toolbar', 'Session', 'Cookie');
+	# 使用モデル
+	public $uses = array(
+		"Location", "Sales", "SalesType", "TotalSales", "CreditSales", "CreditType", "CustomerCount", "CustomerTimezone", "CouponDiscount",
+		"CouponType", "OtherDiscount", "OtherType", "Expense", "ExpenseType", "OtherInformation", "SlipNumber", "Attendance", "AttendanceResult",
+		"PartyInformation", "Inventory", "Payroll", "Target", "PayableAccount", "Holiday", "SalesLunch", "SalesAttribute", "AddCash", "Member",
+		"MemberPost", "MemberPosition", "MemberType", "Passcode", "AccountType",
+	);
 
 	public function beforeFilter(){
 		#username&passcode
 		if($this->Cookie->check('myData')){
-			$this->loadModel("Passcode");
 			$passcode = $this->Passcode->find('first', array(
 				'conditions' => array('Passcode.location_id' => $this->Cookie->read('myData'))
 			));

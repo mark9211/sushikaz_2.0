@@ -6,18 +6,12 @@
  * Time: 3:44
  */
 class AdminController extends AppController{
-	#フォームヘルパー
-	public $helpers = array('Html', 'Form');
-	#Cookieの使用
-	var $components = array('Cookie');
 
 	#共通スクリプト
 	public function beforeFilter(){
 		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', '管理者ページ');
-		#使用モデル
-		$this->loadModel("Location");
 	}
 
 	#インデックス

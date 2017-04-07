@@ -6,18 +6,12 @@
  * Time: 12:24
  */
 class HolidaysController extends AppController{
-	#フォームヘルパー
-	public $helpers = array('Html', 'Form');
-	#Cookieの使用
-	var $components = array('Cookie');
 
 	#共通スクリプト
 	public function beforeFilter(){
 		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', '休業日設定');
-		#使用モデル
-		$this->loadModel("Location");
 		#ログイン処理
 		if(!$this->Cookie->check('myData')){
 			#loginページへ

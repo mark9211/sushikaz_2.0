@@ -9,46 +9,12 @@
 App::import('Vendor', 'OAuth/OAuthClient');
 
 class SalesController extends AppController{
-	#フォームヘルパー
-	public $helpers = array('Html', 'Form');
-	#Cookieの使用
-	var $components = array('Cookie');
 
 	#共通スクリプト
 	public function beforeFilter(){
 		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', '日報入力 | 寿し和');
-		#共通使用モデル
-		$this->loadModel("Location");
-		$this->loadModel("Sales");
-		$this->loadModel("SalesType");
-		$this->loadModel("TotalSales");
-		$this->loadModel("CreditSales");
-		$this->loadModel("CreditType");
-		$this->loadModel("CustomerCount");
-		$this->loadModel("CustomerTimezone");
-		$this->loadModel("CouponDiscount");
-		$this->loadModel("CouponType");
-		$this->loadModel("OtherDiscount");
-		$this->loadModel("OtherType");
-		$this->loadModel("Expense");
-		$this->loadModel("ExpenseType");
-		$this->loadModel("OtherInformation");
-		$this->loadModel("SlipNumber");
-		$this->loadModel("Attendance");
-		$this->loadModel("AttendanceResult");
-		$this->loadModel("Member");
-		$this->loadModel("PartyInformation");
-		$this->loadModel("Inventory");
-		$this->loadModel("Payroll");
-		$this->loadModel("Target");
-		$this->loadModel("PayableAccount");
-		$this->loadModel("Holiday");
-		$this->loadModel("SalesLunch");
-		$this->loadModel("SalesAttribute");
-		$this->loadModel("AddCash");
-
 		#ログイン処理
 		if(!$this->Cookie->check('myData')){
 			#loginページへ
