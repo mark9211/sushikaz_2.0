@@ -1,5 +1,6 @@
-<<<<<<< HEAD
-# CakePHP
+
+
+CakePHP
 
 [![Latest Stable Version](https://poser.pugx.org/cakephp/cakephp/v/stable.svg)](https://packagist.org/packages/cakephp/cakephp)
 [![License](https://poser.pugx.org/cakephp/cakephp/license.svg)](https://packagist.org/packages/cakephp/cakephp)
@@ -52,4 +53,4 @@ Our primary goal is to provide a structured framework that enables PHP users at 
 =======
 # sushikaz_2.0
 寿し和システム店舗用
->>>>>>> 1025ca67c091302e8563e97608d46a5ec51b1b94
+
