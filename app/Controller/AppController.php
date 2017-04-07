@@ -39,10 +39,11 @@ class AppController extends Controller {
 	public $uses = array(
 		"Location", "Sales", "SalesType", "TotalSales", "CreditSales", "CreditType", "CustomerCount", "CustomerTimezone", "CouponDiscount",
 		"CouponType", "OtherDiscount", "OtherType", "Expense", "ExpenseType", "OtherInformation", "SlipNumber", "Attendance", "AttendanceResult",
-		"PartyInformation", "Inventory", "Payroll", "Target", "PayableAccount", "Holiday", "SalesLunch", "SalesAttribute", "AddCash", "Member",
-		"MemberPost", "MemberPosition", "MemberType", "Passcode", "AccountType",
+		"AttendanceType", "PartyInformation", "Inventory", "Payroll", "Target", "PayableAccount", "Holiday", "SalesLunch", "SalesAttribute", "AddCash",
+		"Member", "MemberPost", "MemberPosition", "MemberType", "Passcode", "AccountType",
 	);
 
+	# 共通処理
 	public function beforeFilter(){
 		#username&passcode
 		if($this->Cookie->check('myData')){
@@ -51,6 +52,27 @@ class AppController extends Controller {
 			));
 			if($passcode!=null){
 				$this->set('passcode', $passcode);
+			}
+		}
+	}
+
+	# ログイン処理
+	public function to_login(){
+		if(!$this->Cookie->check('myData')){
+			$this->Session->setFlash('ログインしてください','flash_error');
+			$this->redirect(array('controller'=>'locations','action'=>'login'));
+		}
+		else{
+			$location = $this->Location->findById($this->Cookie->read('myData'));
+			if($location!=null){
+				$this->set('location', $location);
+				$this->myData = $location;
+			}
+			else{
+				# Cookieの情報クリア
+				$this->Cookie->delete('myData');
+				$this->Session->setFlash('クッキーの値が不正です','flash_error');
+				$this->redirect(array('controller'=>'locations','action'=>'login'));
 			}
 		}
 	}

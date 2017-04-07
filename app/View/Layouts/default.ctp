@@ -59,12 +59,12 @@
 		echo $this->Html->script('assets/global/plugins/jquery.cokie.min.js');
 		echo $this->Html->script('assets/global/plugins/uniform/jquery.uniform.min.js');
 
-	echo $this->Html->script('assets/global/scripts/metronic.js');
-	echo $this->Html->script('assets/admin/layout3/scripts/layout.js');
-	echo $this->Html->script('assets/admin/layout3/scripts/demo.js');
-	echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
-	echo $this->Html->script('assets/admin/pages/scripts/components-form-tools.js');
-	echo $this->Html->script('assets/admin/pages/scripts/components-pickers.js');
+		echo $this->Html->script('assets/global/scripts/metronic.js');
+		echo $this->Html->script('assets/admin/layout3/scripts/layout.js');
+		echo $this->Html->script('assets/admin/layout3/scripts/demo.js');
+		echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
+		echo $this->Html->script('assets/admin/pages/scripts/components-form-tools.js');
+		echo $this->Html->script('assets/admin/pages/scripts/components-pickers.js');
 
 	?>
 

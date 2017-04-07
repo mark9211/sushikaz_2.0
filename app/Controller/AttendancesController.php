@@ -9,25 +9,14 @@ class AttendancesController extends AppController{
 
 	#共通スクリプト
 	public function beforeFilter(){
-		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', 'タイムカード | 寿し和');
-		#ログイン処理
-		if(!$this->Cookie->check('myData')){
-			#loginページへ
-			$this->redirect(array('controller'=>'locations','action'=>'login'));
-		}else{
-			$location = $this->Location->findById($this->Cookie->read('myData'));
-			$this->set('location', $location);
-		}
+		$this->to_login();
 	}
 
-	#インデックス
+	# 従業員選択画面
 	public function index(){
-		#クッキー値
-		$location_id=$this->Cookie->read('myData');
-		#使用モデル
-		$this->loadModel("Attendance");
+		$location_id=$this->myData['Location']['id'];
 		#営業日取得
 		$working_day = $this->Attendance->judge24Hour(time());
 		$this->set('working_day', $working_day);
@@ -35,7 +24,6 @@ class AttendancesController extends AppController{
 		$members=$this->Member->find('all', array(
 			'conditions' => array('Member.location_id' => $location_id, 'Member.status' => 'active')
 		));
-		//debug($members);
 		#従業員雇用形態
 		$member_types = array();
 		#勤務状態取得
@@ -60,10 +48,8 @@ class AttendancesController extends AppController{
 			#勤務状態
 			$this->set('flag', $this->params['url']['flag']);
 		}elseif($this->request->is('post')){
-			#使用モデル
-			$this->loadModel("AttendanceType");
 			#クッキー値
-			$location_id=$this->Cookie->read('myData');
+			$location_id=$this->myData['Location']['id'];
 			#営業日取得
 			$working_day = $this->Attendance->judge24Hour(time());
 			#勤怠状態取得
@@ -96,7 +82,7 @@ class AttendancesController extends AppController{
 				throw new NotFoundException('このページは見つかりませんでした');
 			}
 			#クッキー値
-			$location_id=$this->Cookie->read('myData');
+			$location_id=$this->myData['Location']['id'];
 			#営業日
 			$working_day = $this->params['url']['date'];
 			$this->set('working_day', $working_day);
@@ -165,11 +151,8 @@ class AttendancesController extends AppController{
 	#追加andResult
 	public function add(){
 		if($this->request->is('post')){
-			//debug($this->request->data);
-			#使用モデル
-			$this->loadModel("AttendanceResult");
 			#クッキー値
-			$location_id=$this->Cookie->read('myData');
+			$location_id=$this->myData['Location']['id'];
 			$working_day = $this->request->data['working_day'];
 			if(isset($this->request->data['AttendanceResult'])){
 				foreach($this->request->data['AttendanceResult'] as $key => $attendance_result){
@@ -239,12 +222,8 @@ class AttendancesController extends AppController{
 							$break_arr[] = $break;
 						}
 					}
-					//////////Update/////////////////////////////////////Update///////////////////////////
-					//debug($check_in_time);debug($check_out_time);debug($break_arr);
-					/////////AttendanceResult///////////////////////////////////////////////////////////
 					#時間数計算
 					$hours = $this->Attendance->diffCalculator($working_day,$check_in_time,$check_out_time, $break_arr);
-					//debug($hours);
 					#現時点での給与
 					$member = $this->Member->findById($key);
 					#既存かどうか
@@ -274,14 +253,12 @@ class AttendancesController extends AppController{
 						));
 					}
 					$this->AttendanceResult->create(false);$this->AttendanceResult->save($data);
-					/////////AttendanceResult///////////////////////////////////////////////////////////
 				}
 			}
 			#新規
 			foreach($this->request->data['NewAttendanceResult'] as $new_attendance_result){
 				#空判定
 				if($new_attendance_result['member_id']!=null&&$new_attendance_result['attendance_start']!=null&&$new_attendance_result['attendance_end']!=null){
-					#AttendanceResult
 					#現時点の時給取得
 					$member = $this->Member->findById($new_attendance_result['member_id']);
 					#既存かどうか
@@ -322,7 +299,7 @@ class AttendancesController extends AppController{
 					*/
 				}
 			}
-			$this->Session->setFlash("勤怠管理を受け付けました。");
+			$this->Session->setFlash("勤怠管理を受け付けました。", 'flash_success');
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
 		}
 	}
