@@ -75,18 +75,7 @@ class DATABASE_CONFIG {
 		'encoding' => 'utf8',
 	);
 
-	public $test = array(
-		'datasource' => 'Database/Mysql',
-		'persistent' => false,
-		'host' => 'localhost',
-		'login' => 'user',
-		'password' => 'password',
-		'database' => 'test_database_name',
-		'prefix' => '',
-		'encoding' => 'utf8',
-	);
-        
-        public $mdb = array(
+	public $mdb = array(
 		'datasource' => 'Database/Mysql',
 		'persistent' => false,
 		'host' => 'mysql319.db.sakura.ne.jp',
@@ -96,4 +85,27 @@ class DATABASE_CONFIG {
 		'prefix' => '',
 		'encoding' => 'utf8',
 	);
+
+	public $dev = array(
+		'datasource' => 'Database/Mysql',
+		'persistent' => false,
+		'host' => 'localhost',
+		'login' => 'root',
+		'password' => 'root',
+		'database' => 'sushikaz',
+		'prefix' => '',
+		'encoding' => 'utf8',
+	);
+
+	public $dev_mdb = array(
+		'datasource' => 'Database/Mysql',
+		'persistent' => false,
+		'host' => 'localhost',
+		'login' => 'root',
+		'password' => 'root',
+		'database' => 'mdb',
+		'prefix' => '',
+		'encoding' => 'utf8',
+	);
+
 }
