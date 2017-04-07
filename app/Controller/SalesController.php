@@ -2998,6 +2998,7 @@ class SalesController extends AppController{
 										if($record[24]=="出前"){
 											if(isset($demae[$working_day]['fee'])){ $demae[$working_day]['fee']+=$record[28]*$record[29]; } else { $demae[$working_day]['fee']=$record[28]*$record[29]; }
 											if(isset($demae[$working_day]['cnt'])){ $demae[$working_day]['cnt']+=$record[29]; } else { $demae[$working_day]['cnt']=$record[29]; }
+											debug($demae);
 										}
 										# 飲料
 										elseif(in_array($record[24], $drink_arr)){
