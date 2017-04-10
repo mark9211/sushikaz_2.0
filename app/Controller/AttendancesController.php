@@ -41,6 +41,7 @@ class AttendancesController extends AppController{
 
 	#勤怠画面
 	public function view(){
+		$this->layout = 'simple';
 		if($this->request->is('get')){
 			#従業員情報
 			$member = $this->Member->findById($this->params['url']['id']);

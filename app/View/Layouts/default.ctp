@@ -21,9 +21,9 @@
 	<title>
 		<?php echo $this->fetch('title'); ?>
 	</title>
-	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css">
 	<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-
+	<link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css">
+	<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
 	<?php
 		echo $this->Html->meta('icon');
 
@@ -42,7 +42,6 @@
 		echo $this->Html->css('assets/admin/layout3/css/layout.css');
 		echo $this->Html->css('assets/admin/layout3/css/themes/default.css', array('id'=>'style_color'));
 		echo $this->Html->css('assets/admin/layout3/css/custom.css');
-
 
 		#base js
 		echo $this->Html->script('js/modernizr-2.6.2.min.js');
@@ -66,7 +65,6 @@
 		echo $this->Html->script('assets/admin/pages/scripts/components-pickers.js');
 
 	?>
-
 </head>
 <body>
 	<div id="container">
@@ -253,7 +251,6 @@
 		</div>
 
 		<div id="content">
-
 			<?php echo $this->Session->flash(); ?>
 
 			<?php echo $this->fetch('content'); ?>
@@ -262,7 +259,7 @@
 		<div id="footer">
 			<div class="page-footer">
 				<div class="container">
-					2015 &copy; Riverside, INC. All Rights Reserved.
+					2017 &copy; Riverside, INC. All Rights Reserved.
 				</div>
 			</div>
 			<div class="scroll-to-top">

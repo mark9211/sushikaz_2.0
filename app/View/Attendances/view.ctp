@@ -30,7 +30,6 @@ echo $this->Html->script('clock/js/svg.clock.min.js');
 echo $this->Html->script('clock/js/jquery.timers.min.js');
 echo $this->Html->script('clock/js/clock.js');
 
-
 ?>
 <section class="mainarea">
 	<section class="main-menu-container">
@@ -42,7 +41,7 @@ echo $this->Html->script('clock/js/clock.js');
 	</section>
 	<div id="clock" class="active">
 		<div class="clock-container">
-			<div id="time-container-wrap" style="margin-top: 30px;">
+			<div id="time-container-wrap" style="margin-top: 50px;">
 				<div id="time-container">
 					<div class="numbers-container"></div>
 					<span id="ticker" class="clock-label">TIME CARD</span>
