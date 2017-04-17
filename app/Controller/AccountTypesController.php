@@ -14,20 +14,14 @@ class AccountTypesController extends AppController {
 		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', '買掛支出先設定 | 寿し和');
-		if(!$this->Cookie->check('myData')){
-			#loginページへ
-			$this->redirect(array('controller'=>'locations','action'=>'login'));
-		}else{
-			$location = $this->Location->findById($this->Cookie->read('myData'));
-			$this->set('location', $location);
-		}
+		$this->to_login();
 	}
 
 	#index上書き
 	public function index(){
 		#従業員取得byLocationId
 		$account_types = $this->AccountType->find('all', array(
-			'conditions' => array('AccountType.location_id'=>$this->Cookie->read('myData'))
+			'conditions' => array('AccountType.location_id'=>$this->myData['Location']['id'])
 		));
 		$this->set('account_types', $account_types);
 	}
@@ -37,7 +31,7 @@ class AccountTypesController extends AppController {
 		if($this->request->is('post')){
 			#従業員情報
 			$account_type = $this->AccountType->findById($id);
-			if ($account_type != null) {
+			if ($account_type!=null) {
 				$this->set('account_type', $account_type);
 				#店舗
 				$locations = $this->Location->find('all');

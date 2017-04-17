@@ -16,21 +16,14 @@ class SalesController extends AppController{
 		parent::beforeFilter();
 		$this->set('title_for_layout', '日報入力 | 寿し和');
 		#ログイン処理
-		if(!$this->Cookie->check('myData')){
-			#loginページへ
-			$this->redirect(array('controller'=>'locations','action'=>'login'));
-		}else{
-			#クッキー値
-			$location = $this->Location->findById($this->Cookie->read('myData'));
-			$this->set('location', $location);
-		}
+		$this->to_login();
 	}
 
 	#インデックス
 	public function index(){
 			if($this->request->is('get')){
 				#クッキー値
-				$location = $this->Location->findById($this->Cookie->read('myData'));
+				$location = $this->myData;
 				#営業日
 				$working_day = $this->params['url']['date'];
 				$this->set('working_day', $working_day);
@@ -253,7 +246,7 @@ class SalesController extends AppController{
 		if($this->request->is('post')){
 			//debug($this->request->data);exit;
 			#クッキー値
-			$location = $this->Location->findById($this->Cookie->read('myData'));
+			$location = $this->myData;
 			#売上情報
 			foreach($this->request->data['sales'] as $key => $sales){
 				#validation
@@ -883,7 +876,7 @@ class SalesController extends AppController{
 				$this->loadModel("SlipType");
 
 				#クッキー値
-				$location = $this->Location->findById($this->Cookie->read('myData'));
+				$location = $this->myData;
 				#売上内訳
 				$sales_types = $this->SalesType->find('all', array(
 					'conditions' => array('SalesType.location_id' => $location['Location']['id'])
@@ -1217,10 +1210,9 @@ class SalesController extends AppController{
 	public function monthly_report(){
 		if($this->request->is('post')){
 			#クッキー値
-			$location = $this->Location->findById($this->Cookie->read('myData'));
+			$location = $this->myData;
 			if($this->request->data['month']==null){
-				debug("月が入力されていません");
-				exit;
+				debug("月が入力されていません");exit;
 			}
 			// // エクセル出力用ライブラリ
 			App::import('Vendor', 'PHPExcel/Classes/PHPExcel');
@@ -2309,8 +2301,7 @@ class SalesController extends AppController{
 	#売上目標値設定
 	public function target(){
 		#クッキー値
-		$location = $this->Location->findById($this->Cookie->read('myData'));
-		$this->set('location', $location);
+		$location = $this->myData;
 		if($this->request->is('post')){
 			if($this->request->data['Target']['target_one']!=null&&$this->request->data['Target']['target_two']!=null&&$this->request->data['Target']['target_three']!=null&&$this->request->data['Target']['target_four']!=null){
 				if($this->Target->save($this->request->data)){
@@ -2334,8 +2325,7 @@ class SalesController extends AppController{
 	#売上目標値計算
 	public function calculate(){
 		# クッキー値
-		$location = $this->Location->findById($this->Cookie->read('myData'));
-		$this->set('location', $location);
+		$location = $this->myData;
 		//$association=$location['Association'];$cnt=count($association);
 		# 掛率デフォルト
 		$t1=105;$t2=15;
@@ -2667,7 +2657,7 @@ class SalesController extends AppController{
 	public function sql(){
 		if($this->request->is('post')){
 			#クッキー値
-			$location = $this->Location->findById($this->Cookie->read('myData'));
+			$location = $this->myData;
 			if($location['Location']['name']=='和光店'){
 				#使用モデル宣言
 				$this->loadModel("Tgroupsales");

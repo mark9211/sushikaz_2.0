@@ -12,15 +12,7 @@ class HolidaysController extends AppController{
 		#ページタイトル設定
 		parent::beforeFilter();
 		$this->set('title_for_layout', '休業日設定');
-		#ログイン処理
-		if(!$this->Cookie->check('myData')){
-			#loginページへ
-			$this->redirect(array('controller'=>'locations','action'=>'login'));
-		}else{
-			#クッキー値
-			$location = $this->Location->findById($this->Cookie->read('myData'));
-			$this->set('location', $location);
-		}
+		$this->to_login();
 	}
 
 	#カレンダー
@@ -30,17 +22,13 @@ class HolidaysController extends AppController{
 
 	#カレンダー
 	public function edit(){
-		#クッキー値
-		$location = $this->Location->findById($this->Cookie->read('myData'));
-		$this->set('location', $location);
+		$location = $this->myData;
 		if($this->request->is('get')){
 			#休業日取得
 			$holidays = $this->Holiday->find('all', array(
 				'conditions' => array('Holiday.location_id' => $location['Location']['id'])
 			));
-			if($holidays!=null){
-				$this->set('holidays', $holidays);
-			}
+			if($holidays!=null){ $this->set('holidays', $holidays); }
 		}
 		if($this->request->is('post')){
 			if(isset($this->request->data['holidays'])){

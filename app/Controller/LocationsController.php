@@ -17,14 +17,7 @@ class LocationsController extends AppController{
 	#インデックス
 	public function index(){
 		#ログイン処理
-		if(!$this->Cookie->check('myData')){
-			#loginページへ
-			$this->redirect(array('action'=>'login'));
-		}else{
-			#クッキー値
-			$location = $this->Location->findById($this->Cookie->read('myData'));
-			$this->set('location', $location);
-		}
+		$this->to_login();
 	}
 
 	#ログイン画面

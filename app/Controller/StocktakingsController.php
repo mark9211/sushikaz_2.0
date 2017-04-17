@@ -13,14 +13,7 @@ class StocktakingsController extends AppController{
         parent::beforeFilter();
         $this->set('title_for_layout', '月別棚卸入力');
         #ログイン処理
-        if(!$this->Cookie->check('myData')){
-            #loginページへ
-            $this->redirect(array('controller'=>'locations','action'=>'login'));
-        }else{
-            #クッキー値
-            $location = $this->Location->findById($this->Cookie->read('myData'));
-            $this->set('location', $location);
-        }
+        $this->to_login();
     }
 
     #カレンダー
@@ -29,8 +22,7 @@ class StocktakingsController extends AppController{
         $this->loadModel("StocktakingType");
         $this->loadModel("Association");
         # クッキー値
-        $location = $this->Location->findById($this->Cookie->read('myData'));
-        $this->set('location', $location);
+        $location = $this->myData;
         # Association
         $associations = $this->Association->find('all', array(
             'conditions' => array('Association.location_id' => $location['Location']['id'])
@@ -84,8 +76,7 @@ class StocktakingsController extends AppController{
     #編集
     public function edit(){
         #クッキー値
-        $location = $this->Location->findById($this->Cookie->read('myData'));
-        $this->set('location', $location);
+        $location = $this->myData;
         $month = $this->request->data['month'];
         $stocktakings = $this->request->data['Stocktaking'];
         if($stocktakings!=null){
