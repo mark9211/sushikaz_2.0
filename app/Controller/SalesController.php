@@ -2887,7 +2887,19 @@ class SalesController extends AppController{
 								}
 								elseif($file_type==3){
 									unset($records[0]);
-									$arr=array();$demae=array();$drink=array();$drink_arr=array("ドリンクその他", "ビール", "ウィスキー", "焼酎", "サワー", "ワイン", "ソフトドリンク", "日本酒", "果実酒");
+									# 飲料カテゴリ指定
+									if($location['Location']['name']=='池袋店'){
+										$drink_arr=array("ドリンクその他", "ビール", "ウィスキー", "焼酎", "サワー", "ワイン", "ソフトドリンク", "日本酒", "果実酒");
+										$itaba_arr=array();
+									}
+									elseif($location['Location']['name']=='赤羽店'){
+										$drink_arr=array("ドリンクその他", "ソフトドリンク", "割り物", "焼酎ボトル", "焼酎グラス", "サワー・カクテル", "ウイスキー", "ワイン", "日本酒",  "ビール");
+										$itaba_arr=array();
+									}
+									else{
+										echo "ERROR: Cookie ID Missing or Incorrect";exit;
+									}
+									$arr=array();$demae=array();$drink=array();$itaba=array();
 									foreach($records as $record){
 										$air_id = $record[34];
 										$air_accounting_detail = $this->AirAccountingDetail->find('first', array(
@@ -2899,9 +2911,7 @@ class SalesController extends AppController{
 											}
 											else{
 												$lastInserted = $this->AirAccountingDetail->find('first', array('conditions' => array('AirAccountingDetail.id' => $this->AirAccountingDetail->getLastInsertID())));
-												if($lastInserted['AirAccountingDetail']['air_id']!=$air_id){
-													continue;
-												}
+												if($lastInserted['AirAccountingDetail']['air_id']!=$air_id){ continue; }
 											}
 										}
 										$data = array('AirAccountingDetail' => array(
@@ -2954,53 +2964,43 @@ class SalesController extends AppController{
 										if($record[24]=="出前"){
 											if(isset($demae[$working_day]['fee'])){ $demae[$working_day]['fee']+=$record[28]*$record[29]; } else { $demae[$working_day]['fee']=$record[28]*$record[29]; }
 											if(isset($demae[$working_day]['cnt'])){ $demae[$working_day]['cnt']+=$record[29]; } else { $demae[$working_day]['cnt']=$record[29]; }
-											debug($demae);
 										}
 										# 飲料
 										elseif(in_array($record[24], $drink_arr)){
-											if(isset($drink[$working_day])){$drink[$working_day]+=$record[28]*$record[29];}else{$drink[$working_day]=$record[28]*$record[29];}
+											if(isset($drink[$working_day])){ $drink[$working_day]+=$record[28]*$record[29]; }else{ $drink[$working_day]=$record[28]*$record[29]; }
+										}
+										# 板場
+										elseif(in_array($record[24], $itaba_arr)){
+											if(isset($itaba[$working_day])){ $itaba[$working_day]+=$record[28]*$record[29]; }else{ $itaba[$working_day]=$record[28]*$record[29]; }
 										}
 									}
-									//debug($demae);debug($drink);
 									# データ統合
 									if($arr!=null){
 										# 池袋店
 										if($location['Location']['name']=='池袋店'){
 											$customer_timezones=$this->CustomerTimezone->find('all', array('conditions' => array('CustomerTimezone.location_id'=>$location['Location']['id'])));
 											foreach($arr as $key => $ar){
-												$customer_arr=array();$total_fee=0;
+												$total_fee=0;$customer_arr=array();
 												# sales
-												$sales = $this->Sales->find('first', array(
-													'conditions' => array('Sales.location_id'=>$location['Location']['id'], 'Sales.working_day'=>$key)
-												));
+												$sales = $this->Sales->find('first', array( 'conditions' => array('Sales.location_id'=>$location['Location']['id'], 'Sales.working_day'=>$key) ));
 												# credit
-												$credit_sales = $this->CreditSales->find('first', array(
-													'conditions' => array('CreditSales.location_id'=>$location['Location']['id'], 'CreditSales.working_day'=>$key)
-												));
+												$credit_sales = $this->CreditSales->find('first', array( 'conditions' => array('CreditSales.location_id'=>$location['Location']['id'], 'CreditSales.working_day'=>$key) ));
 												# coupon_discount
-												$coupon_discount = $this->CouponDiscount->find('first', array(
-													'conditions' => array('CouponDiscount.location_id'=>$location['Location']['id'], 'CouponDiscount.working_day'=>$key)
-												));
+												$coupon_discount = $this->CouponDiscount->find('first', array( 'conditions' => array('CouponDiscount.location_id'=>$location['Location']['id'], 'CouponDiscount.working_day'=>$key) ));
 												# other_discount
-												$other_discount = $this->OtherDiscount->find('first', array(
-													'conditions' => array('OtherDiscount.location_id' => $location['Location']['id'], 'OtherDiscount.working_day' => $key)
-												));
+												$other_discount = $this->OtherDiscount->find('first', array( 'conditions' => array('OtherDiscount.location_id' => $location['Location']['id'], 'OtherDiscount.working_day' => $key) ));
 												# customer_counts
-												$customer_count = $this->CustomerCount->find('first', array(
-													'conditions' => array('CustomerCount.location_id'=>$location['Location']['id'], 'CustomerCount.working_day'=>$key)
-												));
+												$customer_count = $this->CustomerCount->find('first', array( 'conditions' => array('CustomerCount.location_id'=>$location['Location']['id'], 'CustomerCount.working_day'=>$key) ));
 												# total_sales
-												$total_sales = $this->TotalSales->find('first', array(
-													'conditions' => array('TotalSales.location_id'=>$location['Location']['id'], 'TotalSales.working_day'=>$key)
-												));
+												$total_sales = $this->TotalSales->find('first', array( 'conditions' => array('TotalSales.location_id'=>$location['Location']['id'], 'TotalSales.working_day'=>$key) ));
 												foreach($ar as $a){
-													//debug($a);
 													$total_fee+=$a[3];
+													if($location['Location']['name']=='池袋店'){ $credit_type_id = 1; } elseif($location['Location']['name']=='赤羽店'){ $credit_type_id = 4; } else{ $credit_type_id = null; }
 													# クレジット
 													if($a[14]>0&&$credit_sales==null){
 														$data = array('CreditSales' => array(
 															'location_id' => $location['Location']['id'],
-															'type_id' => 1,
+															'type_id' => $credit_type_id,
 															'working_day' => $key,
 															'fee' => $a[14]
 														));
@@ -3008,10 +3008,11 @@ class SalesController extends AppController{
 														$this->CreditSales->save($data);
 													}
 													# ポイント
+													if($location['Location']['name']=='池袋店'){ $other_type_id = 1; } elseif($location['Location']['name']=='赤羽店'){ $other_type_id = 5; } else{ $other_type_id = null; }
 													if($a[13]>0&&$other_discount==null){
 														$data = array('OtherDiscount' => array(
 															'location_id' => $location['Location']['id'],
-															'type_id' => 1,
+															'type_id' => $other_type_id,
 															'working_day' => $key,
 															'customer_name' => '-',
 															'fee' => $a[13],
@@ -3020,10 +3021,11 @@ class SalesController extends AppController{
 														$this->OtherDiscount->save($data);
 													}
 													# 割引
+													if($location['Location']['name']=='池袋店'){ $coupon_type_id = 8; } elseif($location['Location']['name']=='赤羽店'){ $coupon_type_id = 9; } else{ $coupon_type_id = null; }
 													if($a[17]<0&&$coupon_discount==null){
 														$data = array('CouponDiscount' => array(
 															'location_id' => $location['Location']['id'],
-															'type_id' => 1,
+															'type_id' => $coupon_type_id,
 															'working_day' => $key,
 															'customer_name' => '-',
 															'fee' => $a[17]*-1,
@@ -3059,17 +3061,27 @@ class SalesController extends AppController{
 														$this->Sales->create(false);
 														$this->Sales->save($data);
 													}
-													# sales 3
-													$sales_type = $this->SalesType->find('first', array('conditions' => array('SalesType.location_id' => $location['Location']['id'], 'SalesType.name' => "店内売上")));
-													if($sales_type!=null){
-														$data = array('Sales' => array(
-															'location_id' => $location['Location']['id'],
-															'type_id' => $sales_type['SalesType']['id'],
-															'working_day' => $key,
-															'fee' => $total_fee-$drink[$key]-$demae[$key]['fee']
-														));
-														$this->Sales->create(false);
-														$this->Sales->save($data);
+													# sales 3（池袋と赤羽違うよ）
+													if($location['Location']['name']=='池袋店'){
+														$sales_type = $this->SalesType->find('first', array('conditions' => array('SalesType.location_id' => $location['Location']['id'], 'SalesType.name' => "店内売上")));
+														if($sales_type!=null){
+															$data = array('Sales' => array(
+																'location_id' => $location['Location']['id'],
+																'type_id' => $sales_type['SalesType']['id'],
+																'working_day' => $key,
+																'fee' => $total_fee-$drink[$key]-$demae[$key]['fee']
+															));
+															$this->Sales->create(false);
+															$this->Sales->save($data);
+														}
+													}
+													elseif($location['Location']['name']=='赤羽店'){
+														# sales 3-1
+														$sales_type = $this->SalesType->find('first', array('conditions' => array('SalesType.location_id' => $location['Location']['id'], 'SalesType.name' => "板場売上")));
+
+														# sales 3-2
+														$sales_type = $this->SalesType->find('first', array('conditions' => array('SalesType.location_id' => $location['Location']['id'], 'SalesType.name' => "厨房売上")));
+
 													}
 												}
 												if($customer_count==null){
@@ -3079,9 +3091,7 @@ class SalesController extends AppController{
 														$H = date('H', strtotime($customer_timezone['CustomerTimezone']['name']));
 														foreach($customer_arr as $k => $customer){
 															$explode = explode(":", $k);
-															if($H==$explode[0]){
-																$count+=$customer;
-															}
+															if($H==$explode[0]){ $count+=$customer; }
 														}
 														$data = array('CustomerCount' => array(
 															'location_id' => $location['Location']['id'],
