@@ -2899,7 +2899,7 @@ class SalesController extends AppController{
 									else{
 										echo "ERROR: Cookie ID Missing or Incorrect";exit;
 									}
-									$arr=array();$demae=array();$drink=array();$itaba=array();
+									$arr=array();$demae=array();$drink=array();$itaba=array();$kosmo=array();
 									foreach($records as $record){
 										$air_id = $record[34];
 										$air_accounting_detail = $this->AirAccountingDetail->find('first', array(
@@ -2978,6 +2978,10 @@ class SalesController extends AppController{
 											if(isset($drink[$working_day])){ $drink[$working_day]+=floor($record[28]*$record[29]/3); }else{ $drink[$working_day]=floor($record[28]*$record[29]/3); }
 											if(isset($itaba[$working_day])){ $itaba[$working_day]+=floor($record[28]*$record[29]/3); }else{ $itaba[$working_day]=floor($record[28]*$record[29]/3); }
 										}
+										# コスモ
+										if($record[25]=="コスモ"){
+											if(isset($kosmo[$working_day])){ $kosmo[$working_day]+=$record[28]*$record[29]; }else{ $kosmo[$working_day]=$record[28]*$record[29]; }
+										}
 									}
 									# データ統合
 									if($arr!=null){
@@ -3001,11 +3005,13 @@ class SalesController extends AppController{
 												if($location['Location']['name']=='池袋店'){ $credit_type_id = 1; } elseif($location['Location']['name']=='赤羽店'){ $credit_type_id = 4; } else{ $credit_type_id = null; }
 												# クレジット
 												if($a[14]>0&&$credit_sales==null){
+													$credit_sum = $a[14];
+													if(isset($kosmo[$key])){ $credit_sum -= $kosmo[$key]; }
 													$data = array('CreditSales' => array(
 														'location_id' => $location['Location']['id'],
 														'type_id' => $credit_type_id,
 														'working_day' => $key,
-														'fee' => $a[14]
+														'fee' => $credit_sum
 													));
 													$this->CreditSales->create(false);
 													$this->CreditSales->save($data);
