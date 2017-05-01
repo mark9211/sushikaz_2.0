@@ -1081,7 +1081,7 @@ class SalesController extends AppController{
 				#売上合計計算andInsert
 				if($sales!=null&&$customer_counts!=null){
 					#20170111
-					if($location['Location']['id']==1){ $coupon_discounts=array(); }
+					if($location['Location']['id']==1||$location['Location']['id']==2){ $coupon_discounts=array(); }
 					$arr = $this->Sales->totalSalesCalculator($sales, $credit_sales, $customer_counts, $coupon_discounts, $other_discounts, $expenses, $other_informations, $add_cashes);
 					#totalsalesインサート
 					#既存or新規
@@ -3177,8 +3177,7 @@ class SalesController extends AppController{
 									}
 								}
 								$this->Session->setFlash('インポートが正常に行われました。');
-								//$this->redirect(array('controller'=>'locations', 'action'=>'index'));
-
+								$this->redirect(array('controller'=>'locations', 'action'=>'index'));
 							}
 
 						}
