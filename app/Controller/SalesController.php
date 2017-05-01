@@ -3000,7 +3000,7 @@ class SalesController extends AppController{
 												$total_fee+=$a[3];
 												if($location['Location']['name']=='池袋店'){ $credit_type_id = 1; } elseif($location['Location']['name']=='赤羽店'){ $credit_type_id = 4; } else{ $credit_type_id = null; }
 												# クレジット
-												if($a[14]>0&&$credit_sales==null&&$a[25]!="コスモ"){
+												if($a[14]>0 && $credit_sales==null){
 													$data = array('CreditSales' => array(
 														'location_id' => $location['Location']['id'],
 														'type_id' => $credit_type_id,
