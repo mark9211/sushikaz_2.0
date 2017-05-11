@@ -220,7 +220,8 @@ class Attendance extends AppModel {
 		#返り値
 		$hours = array('normal_hours' => 0, 'late_hours' => 0);
 		#出勤and退勤
-		$start_time = strtotime("$check_in_time");$end_time = strtotime("$check_out_time");
+		$start_time = strtotime("$check_in_time");
+		$end_time = strtotime("$check_out_time");
 		#深夜時間
 		$ten_hours = strtotime("$working_day 22:00:00");
 		#休憩があるかないか
@@ -257,12 +258,14 @@ class Attendance extends AppModel {
 					if($a[0] > $ten_hours){
 						$late_hours = ($a[1] - $a[0]) / (60 * 60);
 						$hours['late_hours'] += $late_hours;
-					}elseif($a[1] > $ten_hours){
+					}
+					elseif($a[1] > $ten_hours){
 						$normal_hours = ($ten_hours - $a[0]) / (60 * 60);
 						$late_hours = ($a[1] - $ten_hours) / (60 * 60);
 						$hours['normal_hours'] += $normal_hours;
 						$hours['late_hours'] += $late_hours;
-					}else{
+					}
+					else{
 						$normal_hours = ($a[1] - $a[0]) / (60 * 60);
 						$hours['normal_hours'] += $normal_hours;
 					}

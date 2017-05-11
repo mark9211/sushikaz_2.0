@@ -9,6 +9,30 @@ class AttendanceResult extends AppModel {
 	//table指定
 	public $useTable="attendance_results";
 
+	//validate
+	public $validate = array(
+		'hours' => array(
+			array(
+				'rule' => array('comparison', '>=', 0),
+				'message'    => '勤労時間がマイナス値です',
+			),
+			array(
+				'rule' => array('comparison', '<', 16),
+				'message'    => '勤労時間数が大きすぎます',
+			)
+		),
+		'late_hours' => array(
+			array(
+				'rule' => array('comparison', '>=', 0),
+				'message'    => '深夜勤労時間がマイナス値です',
+			),
+			array(
+				'rule' => array('comparison', '<', 16),
+				'message'    => '深夜勤労時間数が大きすぎます',
+			)
+		),
+	);
+
 	//アソシエーション
 	public $belongsTo = array(
 		'Member' => array(

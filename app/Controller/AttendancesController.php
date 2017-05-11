@@ -70,7 +70,7 @@ class AttendancesController extends AppController{
 				'time' => $time
 			));
 			$this->Attendance->save($data);
-			$this->Session->setFlash("完了しました！");
+			$this->Session->setFlash("完了しました！", 'sessions/flash_success');
 			$this->redirect(array('controller'=>'locations', 'action'=>'index'));
 		}
 	}
@@ -141,7 +141,7 @@ class AttendancesController extends AppController{
 						$this->Attendance->delete($this->params['url']['id_four'], false);
 					}
 				}
-				$this->Session->setFlash("出退勤の削除が完了しました");
+				$this->Session->setFlash("出退勤の削除が完了しました", 'sessions/flash_success');
 				$this->redirect($this->referer());
 			}else{
 				throw new NotFoundException('このページは見つかりませんでした');
@@ -152,6 +152,7 @@ class AttendancesController extends AppController{
 	#追加andResult
 	public function add(){
 		if($this->request->is('post')){
+			#debug($this->request->data);exit;
 			#クッキー値
 			$location_id=$this->myData['Location']['id'];
 			$working_day = $this->request->data['working_day'];
@@ -213,14 +214,19 @@ class AttendancesController extends AppController{
 								$break_arr[] = $break;
 							}
 						}
-					}else{
-						foreach($attendance_result['break'] as $id => $break){
-							$data = array('Attendance' => array(
-								'id' => $id,
-								'time' => $break
-							));
-							$this->Attendance->create(false);$this->Attendance->save($data);
-							$break_arr[] = $break;
+					}
+					else{
+						# 2017/05/11
+						if($attendance_result['break']!=null){
+							if(count($attendance_result['break'])%2!=0){ array_pop($attendance_result['break']); }
+							foreach($attendance_result['break'] as $id => $break){
+								$data = array('Attendance' => array(
+									'id' => $id,
+									'time' => $break
+								));
+								$this->Attendance->create(false);$this->Attendance->save($data);
+								$break_arr[] = $break;
+							}
 						}
 					}
 					#時間数計算
@@ -253,7 +259,8 @@ class AttendancesController extends AppController{
 							'makanai' => $attendance_result['makanai']
 						));
 					}
-					$this->AttendanceResult->create(false);$this->AttendanceResult->save($data);
+					$this->AttendanceResult->create(false);
+					if(!$this->AttendanceResult->save($data)){ var_dump($data);var_dump($this->AttendanceResult->validationErrors); }
 				}
 			}
 			#新規
@@ -269,7 +276,8 @@ class AttendancesController extends AppController{
 					#休憩ありなし＝＞時間差分計算
 					if($new_attendance_result['attendance_start_break']==null||$new_attendance_result['attendance_end_break']==null){
 						$hours = $this->Attendance->twoDiffCalculator($working_day, $new_attendance_result['attendance_start'], $new_attendance_result['attendance_end']);
-					}else{
+					}
+					else{
 						$hours = $this->Attendance->fourDiffCalculator($working_day,$new_attendance_result['attendance_start'],$new_attendance_result['attendance_start_break'],$new_attendance_result['attendance_end_break'],$new_attendance_result['attendance_end']);
 					}
 					if($already_result==null){
@@ -285,7 +293,7 @@ class AttendancesController extends AppController{
 							'day_hourly_wage' => $member['Member']['hourly_wage']
 						));
 						$this->AttendanceResult->create(false);
-						$this->AttendanceResult->save($data);
+						if(!$this->AttendanceResult->save($data)){ var_dump($data);var_dump($this->AttendanceResult->validationErrors); }
 					}/*
 					else{
 						$data = array('AttendanceResult' => array(
@@ -300,7 +308,7 @@ class AttendancesController extends AppController{
 					*/
 				}
 			}
-			$this->Session->setFlash("勤怠管理を受け付けました。", 'flash_success');
+			$this->Session->setFlash("勤怠管理を受け付けました。", 'sessions/flash_success');
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
 		}
 	}
