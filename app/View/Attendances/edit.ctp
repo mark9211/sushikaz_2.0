@@ -284,11 +284,9 @@ echo $this->Html->script('assets/admin/pages/scripts/components-pickers.js');
 															<div class="form-group">
 																<select class="form-control" name="NewAttendanceResult[<?echo $i;?>][member_id]">
 																	<option value="">選択してください</option>
-																	<?php foreach ($members as $member): ?>
-																		<?if($member['Type']['name']=='アルバイト'):?>
-																			<option value="<?echo $member['Member']['id']; ?>"><?echo $member['Member']['name']; ?></option>
-																		<?endif;?>
-																	<?php endforeach; ?>
+																	<?foreach ($members as $member): ?>
+																		<option value="<?= $member['Member']['id']; ?>"><?= $member['Member']['name']; ?></option>
+																	<?endforeach; ?>
 																</select>
 															</div>
 														</div>

@@ -1000,10 +1000,8 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 								</tr>
 								</thead>
 								<tbody>
-
 								<?if(isset($attendance_results)):?>
-								<?php foreach ($attendance_results as $attendance_result): ?>
-										<?if($attendance_result['Member']['Type']['name']!='社員'):?>
+									<?foreach ($attendance_results as $attendance_result): ?>
 									<tr>
 										<td>
 											<?php echo $attendance_result['Member']['name']; ?>
@@ -1033,10 +1031,8 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 											<?php echo $attendance_result['AttendanceResult']['hours']+$attendance_result['AttendanceResult']['late_hours']; ?>
 										</td>
 									</tr>
-										<?endif;?>
-								<?php endforeach; ?>
+									<?endforeach; ?>
 								<?endif;?>
-
 								</tbody>
 							</table>
 						</div>
