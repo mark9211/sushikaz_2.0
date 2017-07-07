@@ -1156,7 +1156,8 @@ class SalesController extends AppController{
 				#勤務時間帯挿入
 				$new_attendance_results = array();
 				foreach($attendance_results as $attendance_result){
-					if($attendance_result['Member']!=null){
+					if($attendance_result['Member']['name']!=null){
+						var_dump($attendance_result);
 						$attendance_result['timezone'] = $this->AttendanceResult->judgeLunchDinner($attendance_result);
 						#休憩時間
 						$hours = (strtotime($attendance_result['AttendanceResult']['attendance_end']) - strtotime($attendance_result['AttendanceResult']['attendance_start'])) / (60 * 60);
