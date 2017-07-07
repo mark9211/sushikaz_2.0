@@ -186,6 +186,9 @@ var TableAdvanced = function () {
                 "orderable": false,
                 "targets": [0]
             }],
+            "order": [
+                [3, 'asc']
+            ],
             "lengthMenu": [
                 [5, 15, 20, -1],
                 [5, 15, 20, "All"] // change per page values here
