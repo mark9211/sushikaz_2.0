@@ -1152,7 +1152,8 @@ class SalesController extends AppController{
 						'AttendanceResult.location_id' => $location['Location']['id'],
 						'AttendanceResult.working_day' => $working_day,
 						'not' => array('Member.id' => null)
-					)
+					),
+					'order' => Array('AttendanceResult.attendance_start' => 'asc')
 				));
 				#勤務時間帯挿入
 				$new_attendance_results = array();
