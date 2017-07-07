@@ -1157,13 +1157,15 @@ class SalesController extends AppController{
 				$new_attendance_results = array();
 				foreach($attendance_results as $attendance_result){
 					if($attendance_result['Member']['name']!=null){
-						var_dump($attendance_result);
 						$attendance_result['timezone'] = $this->AttendanceResult->judgeLunchDinner($attendance_result);
 						#休憩時間
 						$hours = (strtotime($attendance_result['AttendanceResult']['attendance_end']) - strtotime($attendance_result['AttendanceResult']['attendance_start'])) / (60 * 60);
 						$hours = $hours - $attendance_result['AttendanceResult']['hours'] - $attendance_result['AttendanceResult']['late_hours'];
 						$attendance_result['break'] = $hours;
 						$new_attendance_results[] = $attendance_result;
+					}
+					else{
+						var_dump($attendance_result);
 					}
 				}
 				$this->set('attendance_results', $new_attendance_results);
