@@ -187,7 +187,7 @@ var TableAdvanced = function () {
                 "targets": [0]
             }],
             "order": [
-                [2, 'asc']
+                [3, 'asc']
             ],
             "lengthMenu": [
                 [5, 15, 20, -1],
