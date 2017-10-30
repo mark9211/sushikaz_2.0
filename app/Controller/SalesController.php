@@ -1066,6 +1066,9 @@ class SalesController extends AppController{
 					$new_attendance_results[] = $attendance_result;
 				}
 				$this->set('attendance_results', $new_attendance_results);
+				# 日次L高
+				$labor_cost = $this->Payroll->laborCostCalculator($attendance_results, date('t', strtotime($working_day)));
+				$this->set('labor_cost', $labor_cost);
 				//////////////////////////////////////////////////////////////////////////////////////////////////////////
 				#人件費売上高比率計算
 				$total_sales = $this->TotalSales->find('first', array(

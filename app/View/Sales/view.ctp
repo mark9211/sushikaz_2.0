@@ -310,10 +310,10 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 								</div>
 								<div class="details">
 									<div class="number">
-										¥<?if(isset($payroll)){echo number_format($payroll['Payroll']['hall']+$payroll['Payroll']['kitchen']);}?>
+										¥<?=number_format($labor_cost['part']+$labor_cost['full']);?>
 									</div>
 									<div class="desc">
-										人件費合計
+										バイト(¥<?=number_format($labor_cost['part']);?>),社員(¥<?=number_format($labor_cost['full']);?>)
 									</div>
 								</div>
 

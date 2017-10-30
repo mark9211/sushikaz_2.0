@@ -17,6 +17,26 @@ class Payroll extends AppModel {
 		)
 	);
 
+	#日次L計算
+	public function laborCostCalculator($attendance_results, $day_num){
+		$part = 0;
+		$full = 0;
+		foreach ($attendance_results as $attendance_result) {
+			#勤怠管理時時給
+			if($attendance_result['AttendanceResult']['day_hourly_wage']!=0){
+				$day_hourly_wage = $attendance_result['AttendanceResult']['day_hourly_wage'];
+			}else{
+				$day_hourly_wage = $attendance_result['Member']['hourly_wage'];
+			}
+			if($attendance_result['Member']['Type']['name'] == 'アルバイト') {	#アルバイト
+				$part += floor($attendance_result['AttendanceResult']['hours'] * $day_hourly_wage) + floor($attendance_result['AttendanceResult']['late_hours'] * floor($day_hourly_wage * 1.25));
+			}elseif($attendance_result['Member']['Type']['name']=='社員'){	#社員
+				$full += floor($attendance_result['Member']['hourly_wage']/$day_num);
+			}
+		}
+		return array("part" => $part, "full" => $full);
+	}
+
 	#人件費率計算（池袋・赤羽）
 	public function ratioCalculator($total_sales, $attendance_results){
 		$hall = 0;
