@@ -2802,7 +2802,7 @@ class SalesController extends AppController{
 									}
 									elseif($location['Location']['name']=='赤羽店'){
 										$drink_arr=array("ドリンクその他", "ソフトドリンク", "割り物", "焼酎ボトル", "焼酎グラス", "サワー・カクテル", "ウイスキー", "ワイン", "日本酒",  "ビール");
-										$itaba_arr=array("にぎり", "お好みにぎり", "お造り", "季節メニュー");
+										$itaba_arr=array("お造り", "にぎり", "お好みにぎり", "一品料理", "速一品");
 									}
 									else{
 										echo "ERROR: Cookie ID Missing or Incorrect";exit;
