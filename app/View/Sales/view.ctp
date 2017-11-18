@@ -959,7 +959,9 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 							<div class="caption">
 								<i class="fa fa-rocket font-green-sharp"></i>
 								<span class="caption-subject font-green-sharp bold uppercase">スタッフ出勤一覧</span>
-								<span class="caption-helper">attendance list</span>
+								<span class="caption-helper">
+									<?=$this->Form->postLink('人員配置シート', array('action'=>'daily_report'),array('data' => array('date' => $working_day))); ?>
+								</span>
 							</div>
 							<div class="tools">
 								<a href="javascript:;" class="collapse">

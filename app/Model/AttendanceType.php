@@ -9,12 +9,4 @@ class AttendanceType extends AppModel {
 	//table指定
 	public $useTable="attendance_types";
 
-	//アソシエーション
-	public $hasMany = array(
-		'Attendance' => array(
-			'className' => 'Attendance',
-			'foreignKey' => 'type_id'
-		)
-	);
-
 }

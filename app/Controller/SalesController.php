@@ -1343,7 +1343,8 @@ class SalesController extends AppController{
 						}
 					}
 				}
-			}elseif($this->request->data['data_type']==2){
+			}
+			elseif($this->request->data['data_type']==2){
 				//店舗毎エクセルシート切り替え
 				if($location['Location']['name']=='池袋店'){
 					$data_name = 'monthly-report-expense-ikebukuro';
@@ -1858,7 +1859,8 @@ class SalesController extends AppController{
 							->setCellValue('F'.$row_number, $payroll['Payroll']['kitchen']);
 					}
 				}
-			}elseif($this->request->data['data_type']==5){
+			}
+			elseif($this->request->data['data_type']==5){
 				//店舗毎エクセルシート切り替え
 				if($location['Location']['name']=='池袋店'){
 					$data_name = 'monthly-report-purchase-ikebukuro';
@@ -1957,7 +1959,8 @@ class SalesController extends AppController{
 						->setCellValue('I'.$row_number, $neta)
 						->setCellValue('K'.$row_number, $sake);
 				}
-			}elseif($this->request->data['data_type']==6){
+			}
+			elseif($this->request->data['data_type']==6){
 				//店舗毎エクセルシート切り替え
 				if($location['Location']['name']=='池袋店'){
 					$data_name = 'monthly-report-saekirate-ikebukuro';
@@ -2057,7 +2060,8 @@ class SalesController extends AppController{
 						->setCellValue('D'.$row_number, $drink_sales)
 						->setCellValue('E'.$row_number, $drink_purchases);
 				}
-			}elseif($this->request->data['data_type']==7){
+			}
+			elseif($this->request->data['data_type']==7){
 				//店舗毎エクセルシート切り替え
 				if($location['Location']['name']=='池袋店'){
 					$data_name = 'monthly-report-mix-ikebukuro';
@@ -2192,7 +2196,7 @@ class SalesController extends AppController{
                 */
 			}
 			else{
-				echo "Fatal Error: Your Request is not avaibale";
+				echo "Fatal Error: Your Request is not available";
 				exit;
 			}
 			// Excel2007
@@ -2203,6 +2207,124 @@ class SalesController extends AppController{
 			$writer = PHPExcel_IOFactory::createWriter($obj, 'Excel2007');
 			$writer->save('php://output');
 			exit;
+		}
+	}
+
+	# 日次報告
+	public function daily_report(){
+		if($this->request->is('post')){
+			# クッキー値
+			$location = $this->myData;
+			if($this->request->data['date']==null){
+				echo "日付が入力されていません";
+				exit;
+			}
+			else{
+				# 曜日配列
+				$weekday = array( "日", "月", "火", "水", "木", "金", "土" );
+				$working_day = $this->request->data['date'];
+				$day = $weekday[date('w', strtotime($working_day))];
+			}
+			# エクセル出力用ライブラリ
+			App::import('Vendor', 'PHPExcel/Classes/PHPExcel');
+			App::import('Vendor', 'PHPExcel/Classes/PHPExcel/IOFactory');
+			# Excel2007形式(xlsx)テンプレートの読み込み
+			$reader = PHPExcel_IOFactory::createReader('Excel2007');
+			$template = realpath(WWW_ROOT);
+			$template .= '/excel/';
+			//////////////////////////////////////////////////////////////////////
+			//店舗毎エクセルシート切り替え
+			if($location['Location']['name']=='池袋店'||$location['Location']['name']=='赤羽店'){
+				$data_name = 'work_schedule_1';
+				$h_arr = array('15'=>8,'16'=>12,'17'=>16,'18'=>20,'19'=>24,'20'=>28,'21'=>32,'22'=>36,'23'=>40,'00'=>44,'01'=>48,'02'=>52,'03'=>56,'04'=>60,'05'=>64,'06'=>68);
+				$m_arr = array('00'=>0,'15'=>1,'30'=>2,'45'=>3);
+			}elseif($location['Location']['name']=='和光店'){
+				$data_name = 'work_schedule_2';
+				$h_arr = array('10'=>8,'11'=>12,'12'=>16,'13'=>20,'14'=>24,'15'=>28,'16'=>32,'17'=>36,'18'=>40,'19'=>44,'20'=>48,'21'=>52,'22'=>56,'23'=>60,'00'=>64,'01'=>68);
+				$m_arr = array('00'=>0,'15'=>1,'30'=>2,'45'=>3);
+			}else{
+				echo "Error: 404";
+				exit;
+			}
+			$templatePath = $template.$data_name.'.xlsx';
+			$obj = $reader->load($templatePath);
+			# Sheet1
+			$obj->setActiveSheetIndex(0)
+				->setCellValue('C2', date('Y年m月d日', strtotime($working_day)).'('.$day.')');
+			# アルバイト（ホール）勤怠記録
+			$member_type_id = $this->MemberType->getMemberTypeId($location['Location']['id'], 'アルバイト');
+			$member_position_id = $this->MemberPosition->getMemberPositionId($location['Location']['id'], 'ホール');
+			$members = $this->Attendance->find('all', array(
+				'conditions' => array('Attendance.location_id' => $location['Location']['id'], 'Attendance.working_day' => $working_day, 'Member.type_id' => $member_type_id, 'Member.position_id' => $member_position_id),
+				'group' => array('Member.id'),
+			));
+			$line_num = 25;
+			$this->work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day);
+			# アルバイト（キッチン）勤怠記録
+			$member_type_id = $this->MemberType->getMemberTypeId($location['Location']['id'], 'アルバイト');
+			$member_position_id = $this->MemberPosition->getMemberPositionId($location['Location']['id'], 'キッチン');
+			$members = $this->Attendance->find('all', array(
+				'conditions' => array('Attendance.location_id' => $location['Location']['id'], 'Attendance.working_day' => $working_day, 'Member.type_id' => $member_type_id, 'Member.position_id' => $member_position_id),
+				'group' => array('Member.id'),
+			));
+			$line_num = 15;
+			$this->work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day);
+			# 社員（キッチン）勤怠記録
+			$member_type_id = $this->MemberType->getMemberTypeId($location['Location']['id'], '社員');
+			$member_position_id = $this->MemberPosition->getMemberPositionId($location['Location']['id'], 'キッチン');
+			$members = $this->Attendance->find('all', array(
+				'conditions' => array('Attendance.location_id' => $location['Location']['id'], 'Attendance.working_day' => $working_day, 'Member.type_id' => $member_type_id, 'Member.position_id' => $member_position_id),
+				'group' => array('Member.id'),
+			));
+			$line_num = 5;
+			$this->work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day);
+			//////////////////////////////////////////////////////////////////////
+			// Excel2007
+			$filename = $data_name.'-'.$this->request->data['date'].'.xlsx';
+			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			header("Content-Disposition: attachment;filename=$filename");
+			header('Cache-Control: max-age=0');
+			$writer = PHPExcel_IOFactory::createWriter($obj, 'Excel2007');
+			$writer->save('php://output');
+			exit;
+		}
+	}
+
+	private function work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day){
+		if($members!=null){
+			foreach($members as $member){
+				# 氏名
+				$obj->setActiveSheetIndex(0)
+					->setCellValue('D'.$line_num, $member['Member']['name']);
+				# 勤怠記録
+				$attendances = $this->Attendance->find('all', array(
+					'conditions' => array('Attendance.location_id' => $location['Location']['id'], 'Attendance.working_day' => $working_day, 'Attendance.member_id' => $member['Member']['id']),
+					'order' => array('Attendance.time'=> 'asc'),
+				));
+				if($attendances!=null){
+					$p_arr = array();
+					foreach($attendances as $key => $attendance){
+						$h = date('H', strtotime($attendance['Attendance']['time']));
+						$i = date('i', strtotime($attendance['Attendance']['time']));
+						$row_num = $h_arr[$h]+$m_arr[$i];
+						$key++;
+						$key=ceil($key/2);
+						$p_arr[$key][] = $row_num;
+					}
+					if($p_arr!=null){
+						foreach($p_arr as $p){
+							$st = $p[0];
+							$en = $p[1];
+							for($i=$st;$i<=$en;$i++){
+								# 1代入
+								$obj->setActiveSheetIndex(0)
+									->setCellValueByColumnAndRow($i, $line_num, 1);
+							}
+						}
+					}
+				}
+				$line_num++;
+			}
 		}
 	}
 

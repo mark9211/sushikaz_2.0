@@ -24,4 +24,12 @@ class MemberPosition extends AppModel {
 		)
 	);
 
+	public function getMemberPositionId($location_id, $name){
+		$member_position = $this->find('first', array(
+			'conditions' => array('MemberPosition.location_id' => $location_id, 'MemberPosition.name' => $name),
+			'fields' => array('MemberPosition.id')
+		));
+		return $member_position['MemberPosition']['id'];
+	}
+
 }

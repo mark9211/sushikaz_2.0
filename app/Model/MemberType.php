@@ -24,4 +24,12 @@ class MemberType extends AppModel {
 		)
 	);
 
+	public function getMemberTypeId($location_id, $name){
+		$member_type = $this->find('first', array(
+			'conditions' => array('MemberType.location_id' => $location_id, 'MemberType.name' => $name),
+			'fields' => array('MemberType.id')
+		));
+		return $member_type['MemberType']['id'];
+	}
+
 }
