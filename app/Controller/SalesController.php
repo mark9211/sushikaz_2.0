@@ -2315,7 +2315,7 @@ class SalesController extends AppController{
 						foreach($p_arr as $p){
 							$st = $p[0];
 							$en = $p[1];
-							for($i=$st;$i<=$en;$i++){
+							for($i=$st;$i<$en;$i++){
 								# 1代入
 								$obj->setActiveSheetIndex(0)
 									->setCellValueByColumnAndRow($i, $line_num, 1);
