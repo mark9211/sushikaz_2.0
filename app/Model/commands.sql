@@ -437,3 +437,48 @@ create table passcodes(
 	created datetime default null,
 	modified datetime default null
 );
+
+#2018/02/07
+CREATE table m_breakdowns(
+	id int not null primary key auto_increment,
+	parent_id int,
+	name varchar(255),
+	status enum('active', 'deleted') default 'active',
+	created datetime default null,
+	modified datetime default null
+);
+
+CREATE TABLE t_breakdowns(
+	id int not null primary key auto_increment,
+	m_id int NOT NULL,
+	location_id int NOT NULL,
+	working_day date NOT NULL,
+	sales int,
+	visitors int,
+	average int,
+	status enum('active', 'deleted') default 'active',
+	created datetime default null,
+	modified datetime default null
+);
+
+#2018/02/08
+create table receipt_summaries(
+	id int not null primary key auto_increment,
+	location_id int NOT NULL,
+	working_day date NOT NULL,
+	receipt_id VARCHAR(255),
+	total int,
+	tax int,
+	visitors int,
+	brand_name VARCHAR(255),
+	breakdown_name VARCHAR(255),
+	food int,
+	drink int,
+	credit int,
+	voucher int,
+	discount int,
+	time datetime,
+	status enum('active', 'deleted') default 'active',
+	created datetime default null,
+	modified datetime default null
+);

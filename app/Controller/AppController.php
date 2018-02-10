@@ -40,7 +40,7 @@ class AppController extends Controller {
 		"Location", "Sales", "SalesType", "TotalSales", "CreditSales", "CreditType", "CustomerCount", "CustomerTimezone", "CouponDiscount",
 		"CouponType", "OtherDiscount", "OtherType", "Expense", "ExpenseType", "OtherInformation", "SlipNumber", "Attendance", "AttendanceResult",
 		"AttendanceType", "PartyInformation", "Inventory", "Payroll", "Target", "PayableAccount", "Holiday", "SalesLunch", "SalesAttribute", "AddCash",
-		"Member", "MemberPost", "MemberPosition", "MemberType", "Passcode", "AccountType",
+		"Member", "MemberPost", "MemberPosition", "MemberType", "Passcode", "AccountType", "Association", "ReceiptSummary", "PartyType", "SlipType", "InventoryType"
 	);
 
 	# 共通処理

@@ -21,224 +21,82 @@ class SalesController extends AppController{
 
 	#インデックス
 	public function index(){
-			if($this->request->is('get')){
-				#クッキー値
-				$location = $this->myData;
-				#営業日
-				$working_day = $this->params['url']['date'];
-				$this->set('working_day', $working_day);
-
-				#使用モデル
-				$this->loadModel("CouponType");
-				$this->loadModel("PartyType");
-				$this->loadModel("SlipType");
-				$this->loadModel("InventoryType");
-				$this->loadModel("AccountType");
-
-				/////////////////////////////////////////////////////////////////////
-				#mdb接続
-				if($location['Location']['name']=='和光店'){
-					$this->mdb($working_day, $location['Location']['id']);
-					//Exception ランチ売上
-					$sales_lunch = $this->SalesLunch->find('first', array(
-						'conditions' => array('SalesLunch.location_id' => $location['Location']['id'], 'SalesLunch.working_day' => $working_day)
-					));
-					if($sales_lunch==null){
-						#寿司
-						$data = array('SalesLunch' => array(
-							'location_id' => $location['Location']['id'],
-							'working_day' => $working_day,
-							'attribute_id' => 1,
-							'fee' => 0
-						));
-						$this->SalesLunch->create();
-						$this->SalesLunch->save($data);
-						#焼肉
-						$data = array('SalesLunch' => array(
-							'location_id' => $location['Location']['id'],
-							'working_day' => $working_day,
-							'attribute_id' => 2,
-							'fee' => 0
-						));
-						$this->SalesLunch->create();
-						$this->SalesLunch->save($data, false);
-					}
-				}
-				/////////////////////////////////////////////////////////////////////
-
-				#売上内訳
-				#既存データ補完
-				$sales_arr = array();
-				$sales_attributes = $this->SalesAttribute->find('all');
-				foreach($sales_attributes as $sales_attribute) {
-					$sales_types = $this->SalesType->find('all', array(
-						'conditions' => array('SalesType.location_id' => $location['Location']['id'], 'SalesType.attribute_id' => $sales_attribute['SalesAttribute']['id'])
-					));
-					foreach ($sales_types as $sales_type) {
-						$sales_type['Today'] = $this->Sales->getByLocationDayType($location['Location']['id'], $working_day, $sales_type['SalesType']['id']);
-						$sales_arr[$sales_attribute['SalesAttribute']['name']][] = $sales_type;
-					}
-				}
-				$this->set('sales_types', $sales_arr);
-				#売上合計値
-				$total_fee = $this->Sales->salesAddition($location['Location']['id'], $working_day);
-				$this->set('total_fee', $total_fee);
-				#売上全体
-				$sales = $this->Sales->find('all', array(
-					'conditions' => array('Sales.location_id' => $location['Location']['id'], 'Sales.working_day' => $working_day)
-				));
-				if($sales!=null){
-					$this->set('sales', $sales);
-				}
-				#20151020ランチ売上
-				$sales_lunches = array();
-				foreach($sales_attributes as $sales_attribute){
-					$sales_lunch = $this->SalesLunch->find('first', array(
-						'conditions' => array('SalesLunch.location_id' => $location['Location']['id'], 'SalesLunch.working_day' => $working_day, 'SalesLunch.attribute_id' => $sales_attribute['SalesAttribute']['id'])
-					));
-					if($sales_lunch!=null){
-						$sales_lunches[$sales_attribute['SalesAttribute']['name']] = $sales_lunch;
-					}
-				}
-				if($sales_lunches!=null){
-					$this->set('sales_lunches', $sales_lunches);
-				}
-				#クレジットカード種類
-				$credit_types = $this->CreditType->find('all', array(
-					'conditions' => array('CreditType.location_id' => $location['Location']['id'])
-				));
-				$this->set('credit_types', $credit_types);
-				#時間帯別客数
-				#既存データ補完
-				#20151019
-				$customer_arr = array();
-				foreach($sales_attributes as $sales_attribute){
-					$customer_timezones = $this->CustomerTimezone->find('all', array(
-						'conditions' => array('CustomerTimezone.location_id' => $location['Location']['id'], 'CustomerTimezone.attribute_id' => $sales_attribute['SalesAttribute']['id'])
-					));
-					foreach ($customer_timezones as $customer_timezone){
-						$customer_timezone['Today'] = $this->CustomerCount->getByLocationDayTimezone($location['Location']['id'], $working_day, $customer_timezone['CustomerTimezone']['id']);
-						$customer_arr[$sales_attribute['SalesAttribute']['name']][] = $customer_timezone;
-					}
-				}
-				$this->set('customer_timezones', $customer_arr);
-				#クーポン種類
-				$coupon_types = $this->CouponType->find('all', array(
-					'conditions' => array('CouponType.location_id' => $location['Location']['id'])
-				));
-				$this->set('coupon_types', $coupon_types);
-				#その他割引種類
-				$other_types = $this->OtherType->find('all', array(
-					'conditions' => array('OtherType.location_id' => $location['Location']['id'])
-				));
-				$this->set('other_types', $other_types);
-				#支出種類
-				$expense_types = $this->ExpenseType->find('all', array(
-					'conditions' => array('ExpenseType.location_id' => $location['Location']['id'])
-				));
-				$this->set('expense_types', $expense_types);
-				#全従業員
-				//$members = $this->Member->getMemberByLocationId($location['Location']['id']);
-				$members = $this->Member->find('all', array(
-					'conditions' => array('Member.location_id' => $location['Location']['id'], 'Member.status' => 'active')
-				));
-				$this->set('members', $members);
-				#宴会コース種類
-				$party_types = $this->PartyType->find('all', array(
-					'conditions' => array('PartyType.location_id' => $location['Location']['id'])
-				));
-				$this->set('party_types', $party_types);
-				#伝票内訳
-				$slip_types = $this->SlipType->find('all', array(
-					'conditions' => array('SlipType.location_id' => $location['Location']['id'])
-				));
-				#20150723-休業日設定
-				$new_working_day = $this->Holiday->beforeWorkingDayIs($working_day, $location['Location']['id']);
-				#既存データ補完
-				$slip_arr = array();
-				foreach($slip_types as $slip_type){
-					$slip_type['Before'] = $this->SlipNumber->getByLocationDayType($location['Location']['id'], $new_working_day, $slip_type['SlipType']['id']);
-					$slip_type['Today'] = $this->SlipNumber->getByLocationDayType($location['Location']['id'], $working_day, $slip_type['SlipType']['id']);
-					$slip_arr[] = $slip_type;
-				}
-				$this->set('slip_types', $slip_arr);
-				#在庫管理品目
-				$inventory_types = $this->InventoryType->find('all', array(
-					'conditions' => array('InventoryType.location_id' => $location['Location']['id'])
-				));
-				#既存データ補完
-				$inventory_arr = array();
-				#20150723-休業日設定
-				$new_working_day = $this->Holiday->beforeWorkingDayIs($working_day, $location['Location']['id']);
-				foreach($inventory_types as $inventory_type){
-					$inventory_type['Before'] = $this->Inventory->bindRecordToday($inventory_type, $new_working_day, $location['Location']['id']);
-					$inventory_type['Today'] = $this->Inventory->bindRecordToday($inventory_type, $working_day, $location['Location']['id']);
-					$inventory_arr[] =$inventory_type;
-				}
-				$this->set('inventory_types', $inventory_arr);
-				#買掛種類
-				$account_types = $this->AccountType->find('all', array(
-					'conditions' => array('AccountType.location_id' => $location['Location']['id'])
-				));
-				#既存データ補完
-				$account_arr = array();
-				foreach($account_types as $account_type){
-					$account_type['Today'] = $this->PayableAccount->getByLocationDayType($location['Location']['id'], $working_day, $account_type['AccountType']['id']);
-					$account_arr[] = $account_type;
-				}
-				$this->set('account_types', $account_arr);
-				########################################既存データの補完########################################
-				#クレジットカード売上
-				$credit_sales = $this->CreditSales->find('all', array(
-					'conditions' => array('CreditSales.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($credit_sales!=null){
-					$this->set('credit_sales', $credit_sales);
-				}
-
-				#クーポン割引
-				$coupon_discounts = $this->CouponDiscount->find('all', array(
-					'conditions' => array('CouponDiscount.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($coupon_discounts!=null){
-					$this->set('coupon_discounts', $coupon_discounts);
-				}
-				#その他割引
-				$other_discounts = $this->OtherDiscount->find('all', array(
-					'conditions' => array('OtherDiscount.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($other_discounts!=null){
-					$this->set('other_discounts', $other_discounts);
-				}
-				#支出
-				$expenses = $this->Expense->find('all', array(
-					'conditions' => array('Expense.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($expenses!=null){
-					$this->set('expenses', $expenses);
-				}
-				#その他情報
-				$other_informations = $this->OtherInformation->find('first', array(
-					'conditions' => array('OtherInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($other_informations!=null){
-					$this->set('other_informations', $other_informations);
-				}
-				#宴会情報
-				$party_informations = $this->PartyInformation->find('all', array(
-					'conditions' => array('PartyInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($party_informations!=null){
-					$this->set('party_informations', $party_informations);
-				}
-				#売掛集金
-				$add_cashes = $this->AddCash->find('all', array(
-					'conditions' => array('AddCash.location_id' => $location['Location']['id'], 'AddCash.working_day' => $working_day)
-				));
-				if($add_cashes!=null){
-					$this->set('add_cashes', $add_cashes);
-				}
+		if($this->request->is('get')){
+			#クッキー値
+			$location = $this->myData;
+			#営業日
+			$working_day = $this->params['url']['date'];
+			$this->set('working_day', $working_day);
+			#支出種類
+			$expense_types = $this->ExpenseType->find('all', array(
+				'conditions' => array('ExpenseType.location_id' => $location['Location']['id'])
+			));
+			$this->set('expense_types', $expense_types);
+			#全従業員
+			$members = $this->Member->find('all', array(
+				'conditions' => array('Member.location_id' => $location['Location']['id'], 'Member.status' => 'active')
+			));
+			$this->set('members', $members);
+			#宴会コース種類
+			$party_types = $this->PartyType->find('all', array(
+				'conditions' => array('PartyType.location_id' => $location['Location']['id'])
+			));
+			$this->set('party_types', $party_types);
+			#伝票内訳
+			$slip_types = $this->SlipType->find('all', array(
+				'conditions' => array('SlipType.location_id' => $location['Location']['id'])
+			));
+			#20150723-休業日設定
+			$new_working_day = $this->Holiday->beforeWorkingDayIs($working_day, $location['Location']['id']);
+			#既存データ補完
+			$slip_arr = array();
+			foreach($slip_types as $slip_type){
+				$slip_type['Before'] = $this->SlipNumber->getByLocationDayType($location['Location']['id'], $new_working_day, $slip_type['SlipType']['id']);
+				$slip_type['Today'] = $this->SlipNumber->getByLocationDayType($location['Location']['id'], $working_day, $slip_type['SlipType']['id']);
+				$slip_arr[] = $slip_type;
 			}
+			$this->set('slip_types', $slip_arr);
+			#買掛種類
+			$account_types = $this->AccountType->find('all', array(
+				'conditions' => array('AccountType.location_id' => $location['Location']['id'])
+			));
+			#既存データ補完
+			$account_arr = array();
+			foreach($account_types as $account_type){
+				$account_type['Today'] = $this->PayableAccount->getByLocationDayType($location['Location']['id'], $working_day, $account_type['AccountType']['id']);
+				$account_arr[] = $account_type;
+			}
+			$this->set('account_types', $account_arr);
+			########################################既存データの補完########################################
+			#支出
+			$expenses = $this->Expense->find('all', array(
+				'conditions' => array('Expense.location_id' => $location['Location']['id'], 'working_day' => $working_day)
+			));
+			if($expenses!=null){
+				$this->set('expenses', $expenses);
+			}
+			#その他情報
+			$other_informations = $this->OtherInformation->find('first', array(
+				'conditions' => array('OtherInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
+			));
+			if($other_informations!=null){
+				$this->set('other_informations', $other_informations);
+			}
+			#宴会情報
+			$party_informations = $this->PartyInformation->find('all', array(
+				'conditions' => array('PartyInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
+			));
+			if($party_informations!=null){
+				$this->set('party_informations', $party_informations);
+			}
+			#売掛集金
+			$add_cashes = $this->AddCash->find('all', array(
+				'conditions' => array('AddCash.location_id' => $location['Location']['id'], 'AddCash.working_day' => $working_day)
+			));
+			if($add_cashes!=null){
+				$this->set('add_cashes', $add_cashes);
+			}
+		}
 	}
 
 	#フォーム入力内容
@@ -247,189 +105,6 @@ class SalesController extends AppController{
 			//debug($this->request->data);exit;
 			#クッキー値
 			$location = $this->myData;
-			#売上情報
-			foreach($this->request->data['sales'] as $key => $sales){
-				#validation
-				if($sales['fee']!=null&&is_numeric($sales['fee'])){
-					if($sales['id']==null){
-						#新規
-						$data = array('Sales' => array(
-							'location_id' => $location['Location']['id'],
-							'type_id' => $key,
-							'working_day' => $this->request->data['working_day'],
-							'fee' => $sales['fee']
-						));
-					}else{
-						#既存
-						$data = array('Sales' => array(
-							'id' => $sales['id'],
-							'fee' => $sales['fee']
-						));
-					}
-					#ループ実行文
-					$this->Sales->create(false);
-					$this->Sales->save($data);
-				}
-			}
-			#ランチ売上既存
-			if(isset($this->request->data['sales_lunch'])){
-				foreach($this->request->data['sales_lunch'] as $key => $sales_lunch){
-					#validation
-					if($sales_lunch['fee']!=null&&is_numeric($sales_lunch['fee'])&&$sales_lunch['id']!=null) {
-						$data = array('SalesLunch' => array(
-							'id' => $key,
-							'fee' => $sales_lunch['fee']
-						));
-						#ループ実行文
-						$this->SalesLunch->create(false);
-						$this->SalesLunch->save($data);
-					}
-				}
-			}
-			#カード情報新規
-			if(isset($this->request->data['new_credit'])){
-				foreach($this->request->data['new_credit'] as $new_credit){
-					#validation
-					if($new_credit['fee']!=null&&is_numeric($new_credit['fee'])&&$new_credit['type_id']!=null){
-						$data = array('CreditSales' => array(
-							'location_id' => $location['Location']['id'],
-							'type_id' => $new_credit['type_id'],
-							'working_day' => $this->request->data['working_day'],
-							'fee' => $new_credit['fee']
-						));
-						#ループ実行文
-						$this->CreditSales->create(false);
-						$this->CreditSales->save($data);
-					}
-				}
-			}
-			#カード情報既存
-			if(isset($this->request->data['credit'])){
-				foreach($this->request->data['credit'] as $key => $credit){
-					#validation
-					if($credit['fee']!=null&&is_numeric($credit['fee'])&&$credit['type_id']!=null) {
-						$data = array('CreditSales' => array(
-							'id' => $key,
-							'location_id' => $location['Location']['id'],
-							'type_id' => $credit['type_id'],
-							'working_day' => $this->request->data['working_day'],
-							'fee' => $credit['fee']
-						));
-						#ループ実行文
-						$this->CreditSales->create(false);
-						$this->CreditSales->save($data);
-					}
-				}
-			}
-			#時間別客数
-			foreach($this->request->data['customer'] as $key => $customer_count){
-				#新規
-				if($customer_count['id']==null){
-					if($customer_count['count']!=null){
-						#既存チェック20161219
-						$c = $this->CustomerCount->find('first', array(
-							'conditions' => array('CustomerCount.location_id'=>$location['Location']['id'], 'CustomerCount.timezone_id'=>$key, 'CustomerCount.working_day'=>$this->request->data['working_day'])
-						));
-						if($c==null){
-							$data = array('CustomerCount' => array(
-								'location_id' => $location['Location']['id'],
-								'timezone_id' => $key,
-								'working_day' => $this->request->data['working_day'],
-								'count' => $customer_count['count']
-							));
-							#ループ実行文
-							$this->CustomerCount->create(false);
-							$this->CustomerCount->save($data);
-						}
-					}
-				}
-				#既存
-				else{
-					if($customer_count['count']!=null) {
-						$data = array('CustomerCount' => array(
-							'id' => $customer_count['id'],
-							'count' => $customer_count['count']
-						));
-						#ループ実行文
-						$this->CustomerCount->create(false);
-						$this->CustomerCount->save($data);
-					}
-				}
-			}
-			#クーポン割引新規
-			if(isset($this->request->data['new_coupon'])){
-				foreach($this->request->data['new_coupon'] as $new_coupon){
-					#validation
-					if($new_coupon['customer_name']!=null&&$new_coupon['fee']!=null&&is_numeric($new_coupon['fee'])&&$new_coupon['type_id']!=null){
-						$data = array('CouponDiscount' => array(
-							'location_id' => $location['Location']['id'],
-							'type_id' => $new_coupon['type_id'],
-							'working_day' => $this->request->data['working_day'],
-							'customer_name' => $new_coupon['customer_name'],
-							'fee' => $new_coupon['fee']
-						));
-						#ループ実行文
-						$this->CouponDiscount->create(false);
-						$this->CouponDiscount->save($data);
-					}
-				}
-			}
-			#クーポン割引既存
-			if(isset($this->request->data['coupon'])){
-				foreach($this->request->data['coupon'] as $key => $coupon){
-					#validation
-					if($coupon['customer_name']!=null&&$coupon['fee']!=null&&is_numeric($coupon['fee'])&&$coupon['type_id']!=null) {
-						$data = array('CouponDiscount' => array(
-							'id' => $key,
-							'location_id' => $location['Location']['id'],
-							'type_id' => $coupon['type_id'],
-							'working_day' => $this->request->data['working_day'],
-							'customer_name' => $coupon['customer_name'],
-							'fee' => $coupon['fee']
-						));
-						#ループ実行文
-						$this->CouponDiscount->create(false);
-						$this->CouponDiscount->save($data);
-					}
-				}
-			}
-			#その他割引新規
-			if(isset($this->request->data['new_other'])){
-				foreach($this->request->data['new_other'] as $new_other){
-					#validation
-					if($new_other['customer_name']!=null&&$new_other['fee']!=null&&is_numeric($new_other['fee'])&&$new_other['type_id']!=null){
-						$data = array('OtherDiscount' => array(
-							'location_id' => $location['Location']['id'],
-							'type_id' => $new_other['type_id'],
-							'working_day' => $this->request->data['working_day'],
-							'customer_name' => $new_other['customer_name'],
-							'fee' => $new_other['fee']
-						));
-						#ループ実行文
-						$this->OtherDiscount->create(false);
-						$this->OtherDiscount->save($data);
-					}
-				}
-			}
-			#その他割引既存
-			if(isset($this->request->data['other'])){
-				foreach($this->request->data['other'] as $key => $other){
-					#validation
-					if($other['customer_name']!=null&&$other['fee']!=null&&is_numeric($other['fee'])&&$other['type_id']!=null) {
-						$data = array('OtherDiscount' => array(
-							'id' => $key,
-							'location_id' => $location['Location']['id'],
-							'type_id' => $other['type_id'],
-							'working_day' => $this->request->data['working_day'],
-							'customer_name' => $other['customer_name'],
-							'fee' => $other['fee']
-						));
-						#ループ実行文
-						$this->OtherDiscount->create(false);
-						$this->OtherDiscount->save($data);
-					}
-				}
-			}
 			#支出新規
 			if(isset($this->request->data['new_expense'])){
 				foreach($this->request->data['new_expense'] as $new_expense){
@@ -481,7 +156,6 @@ class SalesController extends AppController{
 					'absence_two_id' => $this->request->data['OtherInformation']['absence_two_id'],
 					'absence_three_id' => $this->request->data['OtherInformation']['absence_three_id'],
 					'notes' => $this->request->data['OtherInformation']['notes'],
-					'tax' => $this->request->data['OtherInformation']['tax']
 				));
 			}else{
 				#既存
@@ -495,11 +169,9 @@ class SalesController extends AppController{
 					'absence_two_id' => $this->request->data['OtherInformation']['absence_two_id'],
 					'absence_three_id' => $this->request->data['OtherInformation']['absence_three_id'],
 					'notes' => $this->request->data['OtherInformation']['notes'],
-					'tax' => $this->request->data['OtherInformation']['tax']
 				));
 			}
 			$this->OtherInformation->save($data);
-			
 			#伝票番号
 			if(isset($this->request->data['slip'])){
 				foreach($this->request->data['slip'] as $key => $slip_number){
@@ -597,51 +269,6 @@ class SalesController extends AppController{
 					}
 				}
 			}
-			#在庫管理
-			if(isset($this->request->data['inventory'])){
-				foreach($this->request->data['inventory'] as $key => $inventory){
-					# 20160503（前日在庫が入力されずに送信された場合）
-					if($inventory['before_rest']==null){
-						$inventory['before_rest'] = 0;
-					}
-					#validation
-					if($inventory['before_rest']!=null&&is_numeric($inventory['income'])&&is_numeric($inventory['outcome'])){
-						#支出計算20150829
-						#$inventory['outcome']は【本日残り】
-						$outcome = $inventory['before_rest'] + $inventory['income'] - $inventory['outcome'];
-						#既存か新規か
-						$already_inventory = $this->Inventory->find('first', array(
-							'conditions' => array('Inventory.location_id'=>$location['Location']['id'], 'working_day'=>$this->request->data['working_day'], 'type_id'=>$key)
-						));
-						if($already_inventory==null){   //新規
-							$data = array('Inventory' => array(
-								'location_id' => $location['Location']['id'],
-								'type_id' => $key,
-								'working_day' => $this->request->data['working_day'],
-								'income' => $inventory['income'],
-								'outcome' => $outcome,
-								'rest' => $inventory['outcome']
-							));
-							#ループ実行文
-							$this->Inventory->create(false);
-							$this->Inventory->save($data);
-						}else{  //既存
-							$data = array('Inventory' => array(
-								'id' => $already_inventory['Inventory']['id'],
-								'location_id' => $location['Location']['id'],
-								'type_id' => $key,
-								'working_day' => $this->request->data['working_day'],
-								'income' => $inventory['income'],
-								'outcome' => $outcome,
-								'rest' => $inventory['outcome']
-							));
-							#ループ実行文
-							$this->Inventory->create(false);
-							$this->Inventory->save($data);
-						}
-					}
-				}
-			}
 			#買掛管理
 			if(isset($this->request->data['account'])){
 				foreach($this->request->data['account'] as $key => $account){
@@ -667,7 +294,6 @@ class SalesController extends AppController{
 					}
 				}
 			}
-
 			$this->Session->setFlash("日報を受け付けました");
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
 		}
@@ -760,358 +386,130 @@ class SalesController extends AppController{
 
 	#日報一覧
 	public function view(){
-			if($this->request->is('get')){
-				#営業日
-				$working_day = $this->params['url']['date'];
-				$this->set('working_day', $working_day);
-
-				#使用モデル
-				$this->loadModel("SalesType");
-				$this->loadModel("CreditType");
-				$this->loadModel("CustomerTimezone");
-				$this->loadModel("OtherType");
-				$this->loadModel("ExpenseType");
-				$this->loadModel("Member");
-				$this->loadModel("PartyType");
-				$this->loadModel("SlipType");
-
-				#クッキー値
-				$location = $this->myData;
-				#売上内訳
-				$sales_types = $this->SalesType->find('all', array(
-					'conditions' => array('SalesType.location_id' => $location['Location']['id'])
-				));
-				$this->set('sales_types', $sales_types);
-				#ランチ売上
-				$sales_lunches = $this->SalesLunch->find('all', array(
-					'conditions' => array('SalesLunch.location_id' => $location['Location']['id'], 'SalesLunch.working_day' => $working_day)
-				));
-				if($sales_lunches!=null){
-					$this->set('sales_lunches', $sales_lunches);
-				}
-				#クレジットカード種類
-				$credit_types = $this->CreditType->find('all', array(
-					'conditions' => array('CreditType.location_id' => $location['Location']['id'])
-				));
-				$this->set('credit_types', $credit_types);
-				#時間帯
-				$customer_timezones = $this->CustomerTimezone->find('all', array(
-					'conditions' => array('CustomerTimezone.location_id' => $location['Location']['id'])
-				));
-				$this->set('customer_timezones', $customer_timezones);
-				#クーポン種類
-				$coupon_types = $this->CouponType->find('all', array(
-					'conditions' => array('CouponType.location_id' => $location['Location']['id'])
-				));
-				$this->set('coupon_types', $coupon_types);
-				#その他割引種類
-				$other_types = $this->OtherType->find('all', array(
-					'conditions' => array('OtherType.location_id' => $location['Location']['id'])
-				));
-				$this->set('other_types', $other_types);
-				#支出種類
-				$expense_types = $this->ExpenseType->find('all', array(
-					'conditions' => array('ExpenseType.location_id' => $location['Location']['id'])
-				));
-				$this->set('expense_types', $expense_types);
-				#全従業員
-				$members = $this->Member->getMemberByLocationId($location['Location']['id']);
-				$this->set('members', $members);
-				#宴会コース種類
-				$party_types = $this->PartyType->find('all', array(
-					'conditions' => array('PartyType.location_id' => $location['Location']['id'])
-				));
-				$this->set('party_types', $party_types);
-				#伝票内訳
-				$slip_types = $this->SlipType->find('all', array(
-					'conditions' => array('SlipType.location_id' => $location['Location']['id'])
-				));
-				$this->set('slip_types', $slip_types);
-				########################################既存データの補完########################################
-				#売上
-				$this->Sales->recursive = 2;
-				$sales = $this->Sales->find('all', array(
-					'conditions' => array('Sales.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($sales!=null){
-					$this->set('sales', $sales);
-					########################################グラフ########################################
-					#グラフ用配列
-					$graph_two = array();
-					foreach($sales as $sales_one){
-						$graph_two[] = array($sales_one['Type']['name'], $sales_one['Sales']['fee']);
-						#出前売上
-						if($sales_one['Type']['name']=='出前売上'){
-							$sales_demae = $sales_one['Sales']['fee'];
-							$this->set('sales_demae', $sales_demae);
-						}
-					}
-					$this->set('graph_two', json_encode($graph_two));
-					#####################################################################################
-
-					#２店舗用
-					if($sales_lunches!=null){
-						$divise_sales = $this->Sales->diviseSushiYakiniku($sales);
-						//debug($divise_sales);
-						$this->set('sales_categories', $divise_sales);
-						$sales_dinners = $this->Sales->calculateDinnerSales($sales_lunches, $divise_sales);
-						$this->set('sales_dinners', $sales_dinners);
-
-						#アトリビュート
-						$attribute_sales = $this->Sales->diviseSushiYakinikuArray($sales);
-						$this->set('attribute_sales', $attribute_sales);
-						########################################グラフ########################################
-						#グラフ用
-						$graph_two = array();
-						foreach($attribute_sales['寿司'] as $attribute_sale){
-							$graph_two['寿司'][] = array($attribute_sale['Type']['name'], $attribute_sale['Sales']['fee']);
-						}
-						foreach($attribute_sales['焼肉'] as $attribute_sale){
-							$graph_two['焼肉'][] = array($attribute_sale['Type']['name'], $attribute_sale['Sales']['fee']);
-						}
-						$this->set('graph_c', json_encode($graph_two['寿司']));
-						$this->set('graph_d', json_encode($graph_two['焼肉']));
-						#####################################################################################
-
-					}
-				}
-				#クレジットカード売上
-				$credit_sales = $this->CreditSales->find('all', array(
-					'conditions' => array('CreditSales.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($credit_sales!=null){
-					$this->set('credit_sales', $credit_sales);
-				}
-				#時間別客数
-				$this->CustomerCount->recursive = 2;
-				$customer_counts = $this->CustomerCount->find('all', array(
-					'conditions' => array('CustomerCount.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($customer_counts!=null){
-					$this->set('customer_counts', $customer_counts);
-					########################################グラフ########################################
-					$graph_one = array();
-					foreach($customer_counts as $customer_count){
-						$graph_one[] = array(date('H',strtotime($customer_count['Timezone']['name'])), $customer_count['CustomerCount']['count']);
-					}
-					$this->set('graph_one', json_encode($graph_one));
-					#####################################################################################
-					#２店舗用
-					if($sales_lunches!=null) {
-						$divise_customers = $this->CustomerCount->diviseLunchDinner($customer_counts);
-						$this->set('lunch_customers', $divise_customers['lunch']);
-						$this->set('dinner_customers', $divise_customers['dinner']);
-						#ランチ・ディナー客数合計
-						$total_lunch_customers = 0;
-						foreach($divise_customers['lunch'] as $l){
-							$total_lunch_customers += $l;
-						}
-						$this->set('total_lunch_customers', $total_lunch_customers);
-						$total_dinner_customers = 0;
-						foreach($divise_customers['dinner'] as $d){
-							$total_dinner_customers += $d;
-						}
-						$this->set('total_dinner_customers', $total_dinner_customers);
-
-						$attribute_customers = array();
-						foreach ($customer_counts as $customer_count) {
-							$attribute_customers[$customer_count['Timezone']['Attribute']['name']]['content'][] = $customer_count;
-						}
-						$this->set('attribute_customers', $attribute_customers);
-
-						########################################グラフ########################################
-						#グラフ用配列
-						$graph_one = array();
-						foreach($attribute_customers as $attribute_customer){
-							foreach($attribute_customer['content'] as $row){
-								$graph_one[$row['Timezone']['Attribute']['name']][] = array(date('H',strtotime($row['Timezone']['name'])), $row['CustomerCount']['count']);
-							}
-						}
-						$this->set('graph_a', json_encode($graph_one['寿司']));
-						$this->set('graph_b', json_encode($graph_one['焼肉']));
-						#####################################################################################
-					}
-				}
-				#クーポン割引
-				$coupon_discounts = $this->CouponDiscount->find('all', array(
-					'conditions' => array('CouponDiscount.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($coupon_discounts!=null){
-					$this->set('coupon_discounts', $coupon_discounts);
-				}
-				#その他割引
-				$other_discounts = $this->OtherDiscount->find('all', array(
-					'conditions' => array('OtherDiscount.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($other_discounts!=null){
-					$this->set('other_discounts', $other_discounts);
-				}
-				#売掛集金
-				$add_cashes = $this->AddCash->find('all', array(
-					'conditions' => array('AddCash.location_id' => $location['Location']['id'], 'AddCash.working_day' => $working_day)
-				));
-				if($add_cashes!=null){
-					$this->set('add_cashes', $add_cashes);
-				}
-				#支出
-				$expenses = $this->Expense->find('all', array(
-					'conditions' => array('Expense.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($expenses!=null){
-					$this->set('expenses', $expenses);
-				}
-				#その他情報
-				$other_informations = $this->OtherInformation->find('first', array(
-					'conditions' => array('OtherInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($other_informations!=null){
-					$this->set('other_informations', $other_informations);
-					$absences = array();
-					$absences["one"] = $this->Member->find('first', array(
-						'conditions' => array('Member.id' => $other_informations['OtherInformation']['absence_one_id'])
-					));
-					$absences["two"] = $this->Member->find('first', array(
-						'conditions' => array('Member.id' => $other_informations['OtherInformation']['absence_two_id'])
-					));
-					$absences["three"] = $this->Member->find('first', array(
-						'conditions' => array('Member.id' => $other_informations['OtherInformation']['absence_three_id'])
-					));
-					$this->set('absences', $absences);
-				}
-				#売上合計計算andInsert
-				if($sales!=null&&$customer_counts!=null){
-					#20170111
-					if($location['Location']['id']==1||$location['Location']['id']==2){ $coupon_discounts=array(); }
-					$arr = $this->Sales->totalSalesCalculator($sales, $credit_sales, $customer_counts, $coupon_discounts, $other_discounts, $expenses, $other_informations, $add_cashes);
-					#totalsalesインサート
-					#既存or新規
-					$total_sales = $this->TotalSales->find('first', array(
-						'conditions' => array('TotalSales.location_id' => $location['Location']['id'], 'TotalSales.working_day' => $working_day)
-					));
-					if($total_sales==null){
-						$data = array('TotalSales' => array(
-							'location_id' => $location['Location']['id'],
-							'working_day' => $working_day,
-							'sales' => $arr['sales'],
-							'credit_sales' => $arr['credit_sales'],
-							'customer_counts' => $arr['customer_counts'],
-							'coupon_discounts' => $arr['coupon_discounts'],
-							'other_discounts' => $arr['other_discounts'],
-							'expenses' => $arr['expenses'],
-							'tax' => $arr['tax'],
-							'add' => $arr['add'],
-							'cash' => $arr['cash']
-						));
-						if($this->TotalSales->save($data)){
-							$this->set('total_sales', $this->TotalSales->findById($this->TotalSales->getLastInsertID()));
-						}
-					}else{
-						$data = array('TotalSales' => array(
-							'id' => $total_sales['TotalSales']['id'],
-							'sales' => $arr['sales'],
-							'credit_sales' => $arr['credit_sales'],
-							'customer_counts' => $arr['customer_counts'],
-							'coupon_discounts' => $arr['coupon_discounts'],
-							'other_discounts' => $arr['other_discounts'],
-							'expenses' => $arr['expenses'],
-							'tax' => $arr['tax'],
-							'add' => $arr['add'],
-							'cash' => $arr['cash']
-						));
-						if($this->TotalSales->save($data)){
-							$this->set('total_sales', $this->TotalSales->findById($total_sales['TotalSales']['id']));
-						}
-					}
-				}
-				#伝票番号
-				$slip_numbers = $this->SlipNumber->find('all', array(
-					'conditions' => array('SlipNumber.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($slip_numbers!=null){
-					$this->set('slip_numbers', $slip_numbers);
-					#出前数算出
-					foreach($slip_numbers as $slip_number){
-						if($slip_number['Type']['name'] == "出前"){
-							$num_demae = $slip_number['SlipNumber']['end_number'] - $slip_number['SlipNumber']['start_number'] + 1;
-							$this->set('num_demae', $num_demae);
-						}
-					}
-				}
-				#宴会情報
-				$party_informations = $this->PartyInformation->find('all', array(
-					'conditions' => array('PartyInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
-				));
-				if($party_informations!=null){
-					$this->set('party_informations', $party_informations);
-				}
-				#出勤者記録
-				#アソシ二段階
-				$this->AttendanceResult->recursive = 2;
-				$attendance_results = $this->AttendanceResult->find('all', array(
-					'conditions' => array(
-						'AttendanceResult.location_id' => $location['Location']['id'],
-						'AttendanceResult.working_day' => $working_day,
-						'not' => array('Member.id' => null)
-					),
-					'order' => Array('AttendanceResult.attendance_start' => 'asc')
-				));
-				#勤務時間帯挿入
-				$new_attendance_results = array();
-				foreach($attendance_results as $attendance_result){
-					$attendance_result['timezone'] = $this->AttendanceResult->judgeLunchDinner($attendance_result);
-					#休憩時間
-					$hours = (strtotime($attendance_result['AttendanceResult']['attendance_end']) - strtotime($attendance_result['AttendanceResult']['attendance_start'])) / (60 * 60);
-					$hours = $hours - $attendance_result['AttendanceResult']['hours'] - $attendance_result['AttendanceResult']['late_hours'];
-					$attendance_result['break'] = $hours;
-					$new_attendance_results[] = $attendance_result;
-				}
-				$this->set('attendance_results', $new_attendance_results);
-				# 日次L高
-				$labor_cost = $this->Payroll->laborCostCalculator($attendance_results, date('t', strtotime($working_day)));
-				$this->set('labor_cost', $labor_cost);
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////
-				#人件費売上高比率計算
-				$total_sales = $this->TotalSales->find('first', array(
-					'conditions' => array('TotalSales.location_id' => $location['Location']['id'], 'TotalSales.working_day' => $working_day)
-				));
-				if($total_sales!=null) {
-					$ratio_arr = $this->Payroll->ratioCalculator($total_sales, $attendance_results);
-					#既存か新規か
-					$payroll = $this->Payroll->find('first', array(
-						'conditions' => array('total_sales_id' => $total_sales['TotalSales']['id'])
-					));
-					if ($payroll==null) { //新規
-						$data = array('Payroll' => array(
-							'location_id' => $location['Location']['id'],
-							'working_day' => $working_day,
-							'total_sales_id' => $total_sales['TotalSales']['id'],
-							'hall' => $ratio_arr['hall'],
-							'kitchen' => $ratio_arr['kitchen'],
-							'ratio' => $ratio_arr['ratio']
-						));
-						if ($this->Payroll->save($data)) {
-							$this->set('payroll', $this->Payroll->findById($this->Payroll->getLastInsertID()));
-						}
-					} else {  //既存
-						$data = array('Payroll' => array(
-							'id' => $payroll['Payroll']['id'],
-							'hall' => $ratio_arr['hall'],
-							'kitchen' => $ratio_arr['kitchen'],
-							'ratio' => $ratio_arr['ratio']
-						));
-						if ($this->Payroll->save($data)) {
-							$this->set('payroll', $this->Payroll->findById($payroll['Payroll']['id']));
-						}
-					}
-				}
-				//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-				#売上目標値取得
-				$target = $this->Target->getTargetByDay($location['Location']['id'], $working_day);
-				if($target!=null){
-					$this->set('target', $target);
+		if($this->request->is('get')){
+			#営業日
+			$working_day = $this->params['url']['date'];
+			$this->set('working_day', $working_day);
+			#クッキー値
+			$location = $this->myData;
+			#売上/客数/客単
+			$brand_summaries = $this->ReceiptSummary->brandSummarize($location['Location']['id'], $working_day);
+			$new_brand_summaries = [];
+			if($brand_summaries!=null){
+				foreach($brand_summaries as $brand_name => $brand_summary){
+					$brand_summary['Breakdown'] = $this->ReceiptSummary->breakdownSummarize($location['Location']['id'], $working_day, $brand_name);
+					$new_brand_summaries[$brand_name] = $brand_summary;
 				}
 			}
+			$this->set('summaries', $new_brand_summaries);
+			#売掛データ
+			$credit_data = $this->ReceiptSummary->creditData($location['Location']['id'], $working_day);
+			$this->set('credit_data', $credit_data);
+			#金券データ
+			$voucher_data = $this->ReceiptSummary->voucherData($location['Location']['id'], $working_day);
+			$this->set('voucher_data', $voucher_data);
+			#割引/割増データ
+			$discount_data = $this->ReceiptSummary->discountData($location['Location']['id'], $working_day);
+			$this->set('discount_data', $discount_data);
+			#税集計
+			$tax_daily = $this->ReceiptSummary->taxDaily($location['Location']['id'], $working_day);
+			$this->set('tax_daily', $tax_daily);
+			#支出種類
+			$expense_types = $this->ExpenseType->find('all', array(
+				'conditions' => array('ExpenseType.location_id' => $location['Location']['id'])
+			));
+			$this->set('expense_types', $expense_types);
+			#全従業員
+			$members = $this->Member->getMemberByLocationId($location['Location']['id']);
+			$this->set('members', $members);
+			#宴会コース種類
+			$party_types = $this->PartyType->find('all', array(
+				'conditions' => array('PartyType.location_id' => $location['Location']['id'])
+			));
+			$this->set('party_types', $party_types);
+			#伝票内訳
+			$slip_types = $this->SlipType->find('all', array(
+				'conditions' => array('SlipType.location_id' => $location['Location']['id'])
+			));
+			$this->set('slip_types', $slip_types);
+			#売掛集金
+			$add_cashes = $this->AddCash->find('all', array(
+				'conditions' => array('AddCash.location_id' => $location['Location']['id'], 'AddCash.working_day' => $working_day)
+			));
+			if($add_cashes!=null){
+				$this->set('add_cashes', $add_cashes);
+			}
+			#支出
+			$expenses = $this->Expense->find('all', array(
+				'conditions' => array('Expense.location_id' => $location['Location']['id'], 'working_day' => $working_day)
+			));
+			if($expenses!=null){
+				$this->set('expenses', $expenses);
+			}
+			#その他情報
+			$other_informations = $this->OtherInformation->find('first', array(
+				'conditions' => array('OtherInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
+			));
+			if($other_informations!=null){
+				$this->set('other_informations', $other_informations);
+				$absences = array();
+				$absences["one"] = $this->Member->find('first', array(
+					'conditions' => array('Member.id' => $other_informations['OtherInformation']['absence_one_id'])
+				));
+				$absences["two"] = $this->Member->find('first', array(
+					'conditions' => array('Member.id' => $other_informations['OtherInformation']['absence_two_id'])
+				));
+				$absences["three"] = $this->Member->find('first', array(
+					'conditions' => array('Member.id' => $other_informations['OtherInformation']['absence_three_id'])
+				));
+				$this->set('absences', $absences);
+			}
+			#伝票番号
+			$slip_numbers = $this->SlipNumber->find('all', array(
+				'conditions' => array('SlipNumber.location_id' => $location['Location']['id'], 'working_day' => $working_day)
+			));
+			if($slip_numbers!=null){
+				$this->set('slip_numbers', $slip_numbers);
+				#出前数算出
+				foreach($slip_numbers as $slip_number){
+					if($slip_number['Type']['name'] == "出前"){
+						$num_demae = $slip_number['SlipNumber']['end_number'] - $slip_number['SlipNumber']['start_number'] + 1;
+						$this->set('num_demae', $num_demae);
+					}
+				}
+			}
+			#宴会情報
+			$party_informations = $this->PartyInformation->find('all', array(
+				'conditions' => array('PartyInformation.location_id' => $location['Location']['id'], 'working_day' => $working_day)
+			));
+			if($party_informations!=null){
+				$this->set('party_informations', $party_informations);
+			}
+			#出勤記録
+			$this->AttendanceResult->recursive = 2;
+			$attendance_results = $this->AttendanceResult->find('all', array(
+				'conditions' => array(
+					'AttendanceResult.location_id' => $location['Location']['id'],
+					'AttendanceResult.working_day' => $working_day,
+					'not' => array('Member.id' => null)
+				),
+				'order' => Array('AttendanceResult.attendance_start' => 'asc')
+			));
+			#勤務時間帯挿入
+			$new_attendance_results = array();
+			foreach($attendance_results as $attendance_result){
+				$attendance_result['timezone'] = $this->AttendanceResult->judgeLunchDinner($attendance_result);
+				# 休憩時間
+				$hours = (strtotime($attendance_result['AttendanceResult']['attendance_end']) - strtotime($attendance_result['AttendanceResult']['attendance_start'])) / (60 * 60);
+				$hours = $hours - $attendance_result['AttendanceResult']['hours'] - $attendance_result['AttendanceResult']['late_hours'];
+				$attendance_result['break'] = $hours;
+				$new_attendance_results[] = $attendance_result;
+			}
+			$this->set('attendance_results', $new_attendance_results);
+			#日次L高
+			$labor_cost = $this->Payroll->laborCostCalculator($attendance_results, date('t', strtotime($working_day)));
+			$this->set('labor_cost', $labor_cost);
+		}
 	}
 
 	#月末報告
@@ -3285,7 +2683,6 @@ class SalesController extends AppController{
 				foreach($tgroupsales as $tgroupsale){
 					#金額
 					$fee = (int)$tgroupsale['Tgroupsales']['金額'];
-
 					#寿司・板場
 					$type_id = 0;
 					if($tgroupsale['Tgroupsales']['グループコード']==1){

@@ -26,12 +26,12 @@
 	<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
 	<?php
 		echo $this->Html->meta('icon');
-
 		echo $this->fetch('meta');
 		echo $this->fetch('css');
 		echo $this->fetch('script');
 
 		#BEGIN GLOBAL MANDATORY STYLES
+		echo $this->Html->css('style.css');
 		echo $this->Html->css('assets/global/plugins/font-awesome/css/font-awesome.min.css');
 		echo $this->Html->css('assets/global/plugins/simple-line-icons/simple-line-icons.min.css');
 		echo $this->Html->css('assets/global/plugins/bootstrap/css/bootstrap.min.css');
@@ -43,10 +43,9 @@
 		echo $this->Html->css('assets/admin/layout3/css/themes/default.css', array('id'=>'style_color'));
 		echo $this->Html->css('assets/admin/layout3/css/custom.css');
 
-		#base js
+		#baseJs
 		echo $this->Html->script('js/modernizr-2.6.2.min.js');
-
-		#plugin js
+		#pluginJs
 		echo $this->Html->script('assets/global/plugins/jquery.min.js');
 		echo $this->Html->script('assets/global/plugins/jquery-migrate.min.js');
 		echo $this->Html->script('assets/global/plugins/jquery-ui/jquery-ui.min.js');
@@ -56,7 +55,7 @@
 		echo $this->Html->script('assets/global/plugins/jquery.blockui.min.js');
 		echo $this->Html->script('assets/global/plugins/jquery.cokie.min.js');
 		echo $this->Html->script('assets/global/plugins/uniform/jquery.uniform.min.js');
-
+		#themeJs
 		echo $this->Html->script('assets/global/scripts/metronic.js');
 		echo $this->Html->script('assets/admin/layout3/scripts/layout.js');
 		echo $this->Html->script('assets/admin/layout3/scripts/demo.js');
@@ -126,15 +125,15 @@
 										タイムカード
 									</a>
 								</li>
+								<li class="menu-dropdown mega-menu-dropdown mega-menu-full">
+									<a data-toggle="modal" href="#responsive_1">
+										勤怠管理 </a>
+								</li>
 								<li class="menu-dropdown mega-menu-dropdown mega-menu-full ">
 									<?$date = date('Y-m-d', strtotime('-1 day'));?>
 									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'index', '?' => array('date' => $date)));?>"' class="dropdown-toggle">
 										日報入力
 									</a>
-								</li>
-								<li class="menu-dropdown mega-menu-dropdown mega-menu-full">
-									<a data-toggle="modal" href="#responsive_1">
-										勤怠管理 </a>
 								</li>
 								<li class="menu-dropdown mega-menu-dropdown mega-menu-full ">
 									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'view', '?' => array('date' => $date)));?>"' class="dropdown-toggle">
@@ -145,11 +144,16 @@
 									<a data-toggle="modal" href="#responsive_2">
 										従業員管理 </a>
 								</li>
+								<!--
 								<li class="menu-dropdown">
-									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'monthly_report'));?>"'>月末報告</a>
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'sales', 'action'=>'monthly_report'));?>"'>月末報告</a>
 								</li>
 								<li class="menu-dropdown">
-									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'sql'));?>"'>本部送信</a>
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'sales', 'action'=>'sql'));?>"'>本部送信</a>
+								</li>
+								-->
+								<li class="menu-dropdown">
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'breakdowns', 'action'=>'index'));?>"'>システム連携</a>
 								</li>
 							</ul>
 						</div>

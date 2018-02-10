@@ -39,25 +39,7 @@ echo $this->Html->script('js/popover.js');
 							</a>
 						</div>
 						<div class="row">
-							<div class="col-md-6">
-								<div class="square">
-									<i class="fa fa-calendar-o"></i>
-									<?$date = date('Y-m-d', strtotime('-1 day'));?>
-									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'index', '?' => array('date' => $date)));?>"'>
-										<div class="square-bg">
-											<?echo $this->Html->image('img/design-minutes.png', array('width'=>'100%','style' => 'background-color:#ab47bc'));?>
-										</div>
-										<div class="square-header">
-											<p class="title">Entry</p>
-											<p class="description">日報<strong>入力</strong></p>
-										</div>
-										<div class="square-post">
-											<p class="title">日報<br/> <strong>入力 <i class="fa fa-arrow-circle-o-right"></i></strong></p>
-										</div>
-									</a>
-								</div>
-							</div>
-							<div class="col-md-6">
+							<div class="col-md-12">
 								<div class="square">
 									<i class="fa fa-globe"></i>
 									<a href="#responsive_1" data-toggle="modal">
@@ -78,6 +60,24 @@ echo $this->Html->script('js/popover.js');
 					</div>
 					<div class="col-md-6">
 						<div class="row">
+							<div class="col-md-12">
+								<div class="square">
+									<i class="fa fa-calendar-o"></i>
+									<?$date = date('Y-m-d', strtotime('-1 day'));?>
+									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'index', '?' => array('date' => $date)));?>"'>
+										<div class="square-bg" style="background-color:#ab47bc">
+											<?echo $this->Html->image('img/design-minutes.png', array('width'=>'50%','height'=>'50%','style' => 'margin: auto;'));?>
+										</div>
+										<div class="square-header">
+											<p class="title">Entry</p>
+											<p class="description">日報<strong>入力</strong></p>
+										</div>
+										<div class="square-post">
+											<p class="title">日報<br/> <strong>入力 <i class="fa fa-arrow-circle-o-right"></i></strong></p>
+										</div>
+									</a>
+								</div>
+							</div>
 							<div class="col-md-12">
 								<div class="square is-loaded">
 									<i class="fa fa-group"></i>
@@ -117,38 +117,21 @@ echo $this->Html->script('js/popover.js');
 							<div class="col-md-6">
 								<div class="square">
 									<i class="fa fa-group "></i>
-									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'monthly_report'));?>"'>
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'breakdowns', 'action'=>'index'));?>"'>
 										<div class="square-bg">
 											<?echo $this->Html->image('img/webdesigner.png', array('width'=>'100%','style' => 'background-color:#8bc34a'));?>
 										</div>
 										<div class="square-header">
-											<p class="title">Report</p>
-											<p class="description">月末報告<strong></strong></p>
+											<p class="title">Master Submit</p>
+											<p class="description">システム連携<strong></strong></p>
 										</div>
 										<div class="square-post">
-											<p class="title">月末<br/><strong>報告<i class="fa fa-arrow-circle-o-right"></i></strong></p>
+											<p class="title">システム<br><strong>連携<i class="fa fa-arrow-circle-o-right"></i></strong></p>
 										</div>
 									</a>
 								</div>
 							</div>
 							<div class="clearfix"></div>
-							<div class="col-md-12">
-								<div class="square is-loaded">
-									<i class="fa fa-group "></i>
-									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'sql'));?>"'>
-									<div class="square-bg">
-											<?echo $this->Html->image('img/cast.png', array('width'=>'100%','height'=>'50%', 'style' => 'background-color:#36C3FF;'));?>
-										</div>
-										<div class="square-header">
-											<p class="title">Master Submit</p>
-											<p class="description">本部送信<strong></strong></p>
-										</div>
-										<div class="square-post">
-											<p class="title">本部<br><strong>送信<i class="fa fa-arrow-circle-o-right"></i></strong></p>
-										</div>
-									</a>
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -156,7 +139,6 @@ echo $this->Html->script('js/popover.js');
 		</div>
 	</div>
 </div>
-
 <script>
 	jQuery(document).ready(function() {
 		// initiate layout and plugins
