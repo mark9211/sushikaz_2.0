@@ -405,7 +405,7 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 									<div class="panel-heading">
 										<h4 class="panel-title">
 											<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse_2_3">
-												クーポン&金券</a>
+												ポイント&金券</a>
 										</h4>
 									</div>
 									<div id="collapse_2_3" class="panel-collapse collapse">

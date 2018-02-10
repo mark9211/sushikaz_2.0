@@ -122,6 +122,7 @@ class BreakdownsController extends AppController{
                             'credit' => $d[9],
                             'voucher' => $d[10],
                             'discount' => $d[11],
+                            'other' => $d[13],
                             'time' => $d[12],
                         ));
                         $this->ReceiptSummary->create(false);
@@ -218,6 +219,7 @@ class BreakdownsController extends AppController{
                             $credit = 0;
                             $voucher = 0;
                             $discount = 0;
+                            $other = 0;
                             $drink = 0;
                             $time = null;
                             $brand = "寿し和";
@@ -248,7 +250,7 @@ class BreakdownsController extends AppController{
                                 if($r[17]!=null){ $discount = (int)$r[17]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
                             }
-                            $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time);
+                            $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
                         }
                     }
                 }
@@ -273,6 +275,7 @@ class BreakdownsController extends AppController{
                             $credit = 0;
                             $voucher = 0;
                             $discount = 0;
+                            $other = 0;
                             $drink = 0;
                             $time = null;
                             $brand = null;
@@ -305,9 +308,10 @@ class BreakdownsController extends AppController{
                                 if($r[31]!=null){ $credit = (int)$r[31]; }
                                 if($r[32]!=null){ $voucher = (int)$r[32]; }
                                 if($r[28]!=null){ $discount = (int)$r[28]; }
+                                if($r[37]!=null){ $other = (int)$r[37]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
                             }
-                            $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time);
+                            $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
                         }
                     }
                 }

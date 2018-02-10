@@ -9,6 +9,36 @@ class ReceiptSummary extends AppModel {
     //table指定
     public $useTable="receipt_summaries";
 
+    #営業日取得byMonth
+    public function getWorkingDay($location_id, $working_month){
+        $working_days = $this->find('list', array(
+            'fields' => array('ReceiptSummary.working_day'),
+            'conditions' => array('ReceiptSummary.location_id' => $location_id, 'ReceiptSummary.working_day LIKE' => '%'.$working_month.'%'),
+            'group' => array('ReceiptSummary.working_day'),
+        ));
+        return $working_days;
+    }
+
+    #日別サマリ
+    public function dailySummarize($location_id, $working_day){
+        $receipt_summary = $this->find('first', array(
+            'fields' => array(
+                'sum(ReceiptSummary.total) as total',
+                'sum(ReceiptSummary.tax) as tax',
+                'sum(ReceiptSummary.visitors) as visitors',
+                'sum(ReceiptSummary.food) as food',
+                'sum(ReceiptSummary.drink) as drink',
+                'sum(ReceiptSummary.credit) as credit',
+                'sum(ReceiptSummary.voucher) as voucher',
+                'sum(ReceiptSummary.discount) as discount',
+                'sum(ReceiptSummary.other) as other',
+            ),
+            'conditions' => array('ReceiptSummary.location_id' => $location_id, 'ReceiptSummary.working_day' => $working_day),
+            'group' => array('ReceiptSummary.working_day'),
+        ));
+        return $receipt_summary;
+    }
+
     #日別ブランド別サマリ
     public function brandSummarize($location_id, $working_day){
         $arr = [];

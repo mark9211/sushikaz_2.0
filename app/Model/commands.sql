@@ -477,6 +477,7 @@ create table receipt_summaries(
 	credit int,
 	voucher int,
 	discount int,
+	other int,
 	time datetime,
 	status enum('active', 'deleted') default 'active',
 	created datetime default null,
