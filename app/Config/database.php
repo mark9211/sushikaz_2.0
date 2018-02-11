@@ -64,7 +64,7 @@
  */
 class DATABASE_CONFIG {
 
-	public $dev = array(
+	public $default = array(
 		'datasource' => 'Database/Mysql',
 		'persistent' => false,
 		'host' => 'mysql319.db.sakura.ne.jp',
@@ -75,7 +75,7 @@ class DATABASE_CONFIG {
 		'encoding' => 'utf8',
 	);
 
-	public $dev_mdb = array(
+	public $mdb = array(
 		'datasource' => 'Database/Mysql',
 		'persistent' => false,
 		'host' => 'mysql319.db.sakura.ne.jp',
@@ -86,7 +86,7 @@ class DATABASE_CONFIG {
 		'encoding' => 'utf8',
 	);
 
-	public $default = array(
+	public $dev = array(
 		'datasource' => 'Database/Mysql',
 		'persistent' => false,
 		'host' => 'localhost',
@@ -97,7 +97,7 @@ class DATABASE_CONFIG {
 		'encoding' => 'utf8',
 	);
 
-	public $mdb = array(
+	public $dev_mdb = array(
 		'datasource' => 'Database/Mysql',
 		'persistent' => false,
 		'host' => 'localhost',
