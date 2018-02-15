@@ -316,7 +316,7 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 								</div>
 								<div class="details">
 									<div class="number">
-										<?if($total!=0){ echo ($labor_cost['part']+$labor_cost['full'])/$total*1000/10; }else{ echo 0;}?>%
+										<?if($total!=0){ echo (floor($labor_cost['part']+$labor_cost['full'])/$total*1000)/10; }else{ echo 0;}?>%
 									</div>
 									<div class="desc">
 										人件費率
