@@ -250,7 +250,9 @@ class BreakdownsController extends AppController{
                                 if($r[17]!=null){ $discount = (int)$r[17]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
                             }
-                            $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
+                            if($total!=0){
+                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
+                            }
                         }
                     }
                 }
@@ -278,12 +280,13 @@ class BreakdownsController extends AppController{
                             $other = 0;
                             $drink = 0;
                             $time = null;
-                            $brand = null;
+                            $brand = "寿し和";
                             $flag = "アラカルト";
                             foreach($receipt_g as $r){
+                                # ブランド切り分け
                                 $brand = $this->judge_by_table_number($r);
                                 if($brand==null){
-                                    if($r[56]=="寿し和"||$r[56]=="和香苑"){ $brand = $r[56]; }
+                                    if($r[56]=="寿し和"||$r[56]=="和香苑"){ $brand = $r[56]; }else{ $brand = "寿し和"; }
                                 }
                                 # ランチメニューが入っているか否か
                                 if($r[57]=="ランチ"&&$r[66]>0){
@@ -307,11 +310,13 @@ class BreakdownsController extends AppController{
                                 if($r[15]!=null){ $visitor = (int)$r[15]; }
                                 if($r[31]!=null){ $credit = (int)$r[31]; }
                                 if($r[32]!=null){ $voucher = (int)$r[32]; }
-                                if($r[28]!=null){ $discount = (int)$r[28]; }
+                                if($r[28]!=null){ $discount = (int)$r[28]*-1; }
                                 if($r[37]!=null){ $other = (int)$r[37]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
                             }
-                            $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
+                            if($total!=0){
+                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
+                            }
                         }
                     }
                 }
