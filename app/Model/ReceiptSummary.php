@@ -19,6 +19,42 @@ class ReceiptSummary extends AppModel {
         return $working_days;
     }
 
+    #月別&ブランド別サマリ
+    public function monthlySummarize($location_id, $working_month, $brand){
+        $receipt_summary = $this->find('first', array(
+            'fields' => array(
+                'sum(ReceiptSummary.total) as total',
+                'sum(ReceiptSummary.tax) as tax',
+                'sum(ReceiptSummary.food) as food',
+                'sum(ReceiptSummary.drink) as drink',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "ランチ" THEN ReceiptSummary.total ELSE 0 END) as lunch',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "ランチ" THEN ReceiptSummary.visitors ELSE 0 END) as lunch_visitors',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "アラカルト" THEN ReceiptSummary.total ELSE 0 END) as dinner',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "アラカルト" THEN ReceiptSummary.visitors ELSE 0 END) as dinner_visitors',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "コース" THEN ReceiptSummary.total ELSE 0 END) as course',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "コース" THEN ReceiptSummary.visitors ELSE 0 END) as course_visitors',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "テイクアウト" THEN ReceiptSummary.total ELSE 0 END) as takeout',
+                'sum(CASE WHEN ReceiptSummary.breakdown_name = "テイクアウト" THEN ReceiptSummary.visitors ELSE 0 END) as takeout_visitors',
+                'sum(ReceiptSummary.credit) as credit',
+                'sum(ReceiptSummary.voucher) as voucher',
+                'sum(ReceiptSummary.discount) as discount',
+                'sum(ReceiptSummary.other) as other',
+            ),
+            'conditions' => array(
+                'ReceiptSummary.location_id' => $location_id,
+                'ReceiptSummary.working_day LIKE' => '%'.$working_month.'%',
+                'ReceiptSummary.brand_name' => $brand
+            ),
+            'group' => array('DATE_FORMAT(working_day, "%Y-%m")'),
+        ));
+        if(isset($receipt_summary[0])){
+            return $receipt_summary[0];
+        }
+        else{
+            return null;
+        }
+    }
+
     #日別サマリ
     public function dailySummarize($location_id, $working_day){
         $receipt_summary = $this->find('first', array(
@@ -106,6 +142,23 @@ class ReceiptSummary extends AppModel {
         else{
             return null;
         }
+    }
+
+    #日次時間帯別サマリ
+    public function timezoneSummarize($location_id, $working_day){
+        $receipt_summary = $this->find('all', array(
+            'fields' => array(
+                'time_format(ReceiptSummary.time, "%H") as hour',
+                'sum(ReceiptSummary.total) as total',
+                'sum(ReceiptSummary.tax) as tax',
+                'sum(ReceiptSummary.visitors) as visitors',
+                'sum(ReceiptSummary.food) as food',
+                'sum(ReceiptSummary.drink) as drink',
+            ),
+            'conditions' => array('ReceiptSummary.location_id' => $location_id, 'ReceiptSummary.working_day' => $working_day),
+            'group' => array('time_format(ReceiptSummary.time, "%H")'),
+        ));
+        return $receipt_summary;
     }
 
     private function brand_init(){

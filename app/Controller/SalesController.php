@@ -1676,6 +1676,21 @@ class SalesController extends AppController{
 			));
 			$line_num = 5;
 			$this->work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day);
+			# 時間帯別売上
+			$timezone_summaries = $this->ReceiptSummary->timezoneSummarize($location['Location']['id'], $working_day);
+			if($timezone_summaries!=null){
+				foreach($timezone_summaries as $timezone_summary){
+					if(isset($timezone_summary[0])){
+						$t = $timezone_summary[0];
+						# 売上
+						$obj->setActiveSheetIndex(0)
+							->setCellValueByColumnAndRow($h_arr[$t['hour']], 43, $t['total']);
+						# 客数
+						$obj->setActiveSheetIndex(0)
+							->setCellValueByColumnAndRow($h_arr[$t['hour']], 44, $t['visitors']);
+					}
+				}
+			}
 			//////////////////////////////////////////////////////////////////////
 			// Excel2007
 			$filename = $data_name.'-'.$this->request->data['date'].'.xlsx';
