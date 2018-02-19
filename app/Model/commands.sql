@@ -483,3 +483,21 @@ create table receipt_summaries(
 	created datetime default null,
 	modified datetime default null
 );
+
+#2018/02/19
+create table order_summaries(
+	id int not null primary key auto_increment,
+	location_id int NOT NULL,
+	working_day date NOT NULL,
+	receipt_id VARCHAR(255),
+	brand_name VARCHAR(255),
+	breakdown_name VARCHAR(255),
+	fd VARCHAR(255),
+	category_name VARCHAR(255),
+	menu_name VARCHAR(255),
+	price int,
+	order_num int,
+	status enum('active', 'deleted') default 'active',
+	created datetime default null,
+	modified datetime default null
+);

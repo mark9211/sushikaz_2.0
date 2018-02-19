@@ -124,6 +124,7 @@ class BreakdownsController extends AppController{
                             'discount' => $d[11],
                             'other' => $d[13],
                             'time' => $d[12],
+                            'visiting_time' => $d[14],
                         ));
                         $this->ReceiptSummary->create(false);
                         $this->ReceiptSummary->save($insert);
@@ -167,6 +168,71 @@ class BreakdownsController extends AppController{
         return $arr;
     }
 
+    # Airレジカテゴリ設定を元にレシートの振り分けを行う
+    private function group_array($shaped_records, $drink_arr){
+        $arr=[];
+        if($shaped_records!=null){
+            foreach($shaped_records as $working_day => $receipt){
+                #レシート振り分け
+                if($receipt!=null){
+                    foreach($receipt as $receipt_id => $receipt_g){
+                        if($receipt_g!=null){
+                            # ブランド&内訳振り分け
+                            $total = 0;
+                            $tax = 0;
+                            $visitor = 0;
+                            $credit = 0;
+                            $voucher = 0;
+                            $discount = 0;
+                            $other = 0;
+                            $drink = 0;
+                            $time = null;
+                            $visiting_time = null;
+                            $brand = "寿し和";
+                            $flag = "アラカルト";
+                            foreach($receipt_g as $r){
+                                # ランチメニューが入っているか否か
+                                if($r[24]=="ランチ"&&$r[28]>0){
+                                    $flag = "ランチ";
+                                }
+                                #  テイクアウトメニューが入っているか否か
+                                elseif($r[24]=="出前"&&$r[28]>0){
+                                    $flag = "テイクアウト";
+                                }
+                                # コースメニューが入っているか否か
+                                elseif($r[24]=="コース"&&$r[28]>0){
+                                    $flag = "コース";
+                                }
+                                # フード/ドリンク内訳
+                                if(in_array($r[24], $drink_arr)){
+                                    $drink+=$r[28]*$r[29];
+                                }
+                                # 合計/小計/客数/売掛/金券/割引
+                                if($r[3]!=null){ $total = (int)$r[3]; }
+                                if($r[5]!=null){ $tax = (int)$r[5]; }
+                                if($r[18]!=null){ $visitor = (int)$r[18]; }
+                                if($r[14]!=null){ $credit = (int)$r[14]; }
+                                if($r[13]!=null){ $voucher = (int)$r[13]; }
+                                if($r[17]!=null){ $discount = (int)$r[17]; }
+                                if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
+                                if($r[1]!=null&&$r[20]!=null){
+                                    $h = date("G", strtotime($r[20]));
+                                    $i = date("i", strtotime($r[20]));
+                                    $s = date("s", strtotime($r[20]));
+                                    $visiting_time = date("Y-m-d H:i:s",strtotime($time."-$h hours -$i minutes -$s seconds"));
+                                }
+                            }
+                            if($total!=0){
+                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $arr;
+    }
+
     # POS+用卓番init設定&Judge関数
     private function judge_by_table_number($r){
         # 寿し和エリア卓番配列
@@ -203,64 +269,6 @@ class BreakdownsController extends AppController{
         return $arr;
     }
 
-    # Airレジカテゴリ設定を元にレシートの振り分けを行う
-    private function group_array($shaped_records, $drink_arr){
-        $arr=[];
-        if($shaped_records!=null){
-            foreach($shaped_records as $working_day => $receipt){
-                #レシート振り分け
-                if($receipt!=null){
-                    foreach($receipt as $receipt_id => $receipt_g){
-                        if($receipt_g!=null){
-                            # ブランド&内訳振り分け
-                            $total = 0;
-                            $tax = 0;
-                            $visitor = 0;
-                            $credit = 0;
-                            $voucher = 0;
-                            $discount = 0;
-                            $other = 0;
-                            $drink = 0;
-                            $time = null;
-                            $brand = "寿し和";
-                            $flag = "アラカルト";
-                            foreach($receipt_g as $r){
-                                # ランチメニューが入っているか否か
-                                if($r[24]=="ランチ"&&$r[28]>0){
-                                    $flag = "ランチ";
-                                }
-                                #  テイクアウトメニューが入っているか否か
-                                elseif($r[24]=="出前"&&$r[28]>0){
-                                    $flag = "テイクアウト";
-                                }
-                                # コースメニューが入っているか否か
-                                elseif($r[24]=="コース"&&$r[28]>0){
-                                    $flag = "コース";
-                                }
-                                # フード/ドリンク内訳
-                                if(in_array($r[24], $drink_arr)){
-                                    $drink+=$r[28]*$r[29];
-                                }
-                                # 合計/小計/客数/売掛/金券/割引
-                                if($r[3]!=null){ $total = (int)$r[3]; }
-                                if($r[5]!=null){ $tax = (int)$r[5]; }
-                                if($r[18]!=null){ $visitor = (int)$r[18]; }
-                                if($r[14]!=null){ $credit = (int)$r[14]; }
-                                if($r[13]!=null){ $voucher = (int)$r[13]; }
-                                if($r[17]!=null){ $discount = (int)$r[17]; }
-                                if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
-                            }
-                            if($total!=0){
-                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $arr;
-    }
-
     # レシートの振り分けを行う（POS+）
     private function group_array_postas($shaped_records){
         $arr=[];
@@ -280,42 +288,43 @@ class BreakdownsController extends AppController{
                             $other = 0;
                             $drink = 0;
                             $time = null;
+                            $visiting_time = null;
                             $brand = "寿し和";
                             $flag = "アラカルト";
                             foreach($receipt_g as $r){
                                 # ブランド切り分け
                                 $brand = $this->judge_by_table_number($r);
                                 if($brand==null){
-                                    if($r[56]=="寿し和"||$r[56]=="和香苑"){ $brand = $r[56]; }else{ $brand = "寿し和"; }
+                                    if($r[57]=="寿し和"||$r[57]=="和香苑"){ $brand = $r[57]; }else{ $brand = "寿し和"; }
                                 }
                                 # ランチメニューが入っているか否か
-                                if($r[57]=="ランチ"&&$r[66]>0){
+                                if(strpos($r[58],'ランチ')!==false && $r[67]>0){
                                     $flag = "ランチ";
                                 }
                                 #  テイクアウトメニューが入っているか否か
-                                elseif($r[57]=="テイクアウト"&&$r[66]>0){
+                                elseif(strpos($r[58],'テイクアウト')!==false && $r[67]>0){
                                     $flag = "テイクアウト";
                                 }
                                 # コースメニューが入っているか否か
-                                elseif($r[57]=="コース"&&$r[66]>0){
+                                elseif(strpos($r[58],'コース')!==false && $r[67]>0){
                                     $flag = "コース";
                                 }
+                                debug($r[58]);debug($flag);
                                 # フード/ドリンク内訳
-                                if($r[58]=="ドリンク"&&$r[66]>0){
-                                    $drink+=$r[66]*$r[67];
-                                }
+                                if($r[58]=="ドリンク"){ $drink+=$r[67]*$r[68]; }
                                 # 合計/小計/客数/売掛/金券/割引
                                 if($r[22]!=null){ $total = (int)$r[22]; }
                                 if($r[23]!=null){ $tax = (int)$r[23]; }
                                 if($r[15]!=null){ $visitor = (int)$r[15]; }
-                                if($r[31]!=null){ $credit = (int)$r[31]; }
-                                if($r[32]!=null){ $voucher = (int)$r[32]; }
+                                if($r[32]!=null){ $credit = (int)$r[32]; }
+                                if($r[33]!=null){ $voucher = (int)$r[33]; }
                                 if($r[28]!=null){ $discount = (int)$r[28]*-1; }
-                                if($r[37]!=null){ $other = (int)$r[37]; }
-                                if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
+                                if($r[38]!=null){ $other = (int)$r[38]; }
+                                if($r[13]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
+                                if($r[12]!=null){ $visiting_time = date("Y-m-d H:i:s", strtotime("$r[12]")); }
                             }
                             if($total!=0){
-                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other);
+                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time);
                             }
                         }
                     }
