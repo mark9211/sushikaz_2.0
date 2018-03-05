@@ -9,16 +9,15 @@ class BreakdownsController extends AppController{
 
     #共通スクリプト
     public function beforeFilter(){
-        #ページタイトル設定
         parent::beforeFilter();
-        $this->set('title_for_layout', '日報入力 | 寿し和');
+        $this->set('title_for_layout', 'システム連携 | 寿し和');
         #ログイン処理
         $this->to_login();
     }
 
     public function index(){
         if($this->request->is('post')){
-            #クッキー値
+            # クッキー値
             $location = $this->myData;
             # FileInfo
             $tmp = $this->request->params['form']['file']['tmp_name'];
@@ -118,6 +117,7 @@ class BreakdownsController extends AppController{
                             'total' => $d[2],
                             'tax' => $d[3],
                             'visitors' => $d[4],
+                            'quantity' => $d[15],
                             'brand_name' => $d[5],
                             'breakdown_name' => $d[6],
                             'food' => $d[7],
@@ -250,6 +250,7 @@ class BreakdownsController extends AppController{
                             $discount = 0;
                             $other = 0;
                             $drink = 0;
+                            $quantity = 0;
                             $time = null;
                             $visiting_time = null;
                             $brand = "寿し和";
@@ -275,6 +276,7 @@ class BreakdownsController extends AppController{
                                 if($r[3]!=null){ $total = (int)$r[3]; }
                                 if($r[5]!=null){ $tax = (int)$r[5]; }
                                 if($r[18]!=null){ $visitor = (int)$r[18]; }
+                                if($r[19]!=null){ $quantity = (int)$r[19]; }
                                 if($r[14]!=null){ $credit = (int)$r[14]; }
                                 if($r[13]!=null){ $voucher = (int)$r[13]; }
                                 if($r[17]!=null){ $discount = (int)$r[17]; }
@@ -287,7 +289,7 @@ class BreakdownsController extends AppController{
                                 }
                             }
                             if($total!=0){
-                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time);
+                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity);
                             }
                         }
                     }
@@ -333,7 +335,7 @@ class BreakdownsController extends AppController{
         return $arr;
     }
 
-    # orderの振り分けを行う（POS+）
+    # POS+用orderの振り分けを行う
     private function order_group_postas($shaped_records){
         $arr=[];
         if($shaped_records!=null){
@@ -374,7 +376,7 @@ class BreakdownsController extends AppController{
         return $arr;
     }
 
-    # レシートの振り分けを行う（POS+）
+    # POS+用レシートの振り分けを行う
     private function group_array_postas($shaped_records){
         $arr=[];
         if($shaped_records!=null){
@@ -386,6 +388,7 @@ class BreakdownsController extends AppController{
                             $total = 0;
                             $tax = 0;
                             $visitor = 0;
+                            $quantity = 0;
                             $credit = 0;
                             $voucher = 0;
                             $discount = 0;
@@ -421,6 +424,7 @@ class BreakdownsController extends AppController{
                                 if($r[22]!=null){ $total = (int)$r[22]; }
                                 if($r[23]!=null){ $tax = (int)$r[23]; }
                                 if($r[15]!=null){ $visitor = (int)$r[15]; }
+                                if($r[21]!=null){ $quantity = (int)$r[21]; }
                                 if($r[30]!=null){ $credit = (int)$r[30]; }
                                 if($r[31]!=null){ $voucher = (int)$r[31]; }
                                 if($r[28]!=null){ $discount = (int)$r[28]*-1; }
@@ -429,7 +433,7 @@ class BreakdownsController extends AppController{
                                 if($r[12]!=null){ $visiting_time = date("Y-m-d H:i:s", strtotime("$r[12]")); }
                             }
                             if($total!=0){
-                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time);
+                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity);
                             }
                         }
                     }
