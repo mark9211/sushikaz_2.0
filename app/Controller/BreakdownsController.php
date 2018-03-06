@@ -7,7 +7,7 @@
  */
 class BreakdownsController extends AppController{
 
-    #共通スクリプト
+    # 共通スクリプト
     public function beforeFilter(){
         parent::beforeFilter();
         $this->set('title_for_layout', 'システム連携 | 寿し和');
@@ -171,10 +171,10 @@ class BreakdownsController extends AppController{
     private function init_categories($location){
         $arr = [];
         if($location['Location']['name']=='池袋店'){
-            $arr=array("ビール", "ウイスキー", "焼酎", "サワー", "ワイン", "ソフトドリンク", "日本酒", "果実酒", "割物");
+            $arr=array("ビール", "ウイスキー", "ウィスキー", "焼酎", "サワー", "ワイン", "ソフトドリンク", "日本酒", "果実酒", "割物");
         }
         elseif($location['Location']['name']=='赤羽店'){
-            $arr=array("ソフトドリンク", "割り物", "焼酎ボトル", "焼酎グラス", "サワー・カクテル", "ウイスキー", "ワイン", "日本酒", "ビール");
+            $arr=array("ソフトドリンク", "割り物", "焼酎ボトル", "焼酎グラス", "サワー・カクテル", "ウイスキー", "ウィスキー", "ワイン", "日本酒", "ビール");
         }
         return $arr;
     }
