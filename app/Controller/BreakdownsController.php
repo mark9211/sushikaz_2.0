@@ -203,10 +203,11 @@ class BreakdownsController extends AppController{
                 if($order!=null){
                     foreach($order as $receipt_id => $order_g){
                         if($order_g!=null){
-                            $brand = "寿し和";
-                            $flag = "アラカルト";
-                            $fd = "フード";
                             foreach($order_g as $o){
+                                # init
+                                $brand = "寿し和";
+                                $flag = "アラカルト";
+                                $fd = "フード";
                                 # ランチメニューが入っているか否か
                                 if($o[24]=="ランチ"&&$o[28]>0){
                                     $flag = "ランチ";
@@ -343,9 +344,10 @@ class BreakdownsController extends AppController{
                 if($order!=null){
                     foreach($order as $receipt_id => $order_g){
                         if($order_g!=null){
-                            $brand = "寿し和";
-                            $flag = "アラカルト";
                             foreach($order_g as $o){
+                                # init
+                                $brand = "寿し和";
+                                $flag = "アラカルト";
                                 # brand
                                 if(strpos($o[54],'寿し和')!==false){
                                     $brand = "寿し和";
