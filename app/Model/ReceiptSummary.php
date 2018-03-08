@@ -156,7 +156,7 @@ class ReceiptSummary extends AppModel {
                 'sum(ReceiptSummary.drink) as drink',
             ),
             'conditions' => array('ReceiptSummary.location_id' => $location_id, 'ReceiptSummary.working_day' => $working_day),
-            'group' => array('time_format(ReceiptSummary.time, "%H")'),
+            'group' => array('time_format(ReceiptSummary.visiting_time, "%H")'),
         ));
         return $receipt_summary;
     }
