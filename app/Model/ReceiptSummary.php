@@ -148,7 +148,7 @@ class ReceiptSummary extends AppModel {
     public function timezoneSummarize($location_id, $working_day){
         $receipt_summary = $this->find('all', array(
             'fields' => array(
-                'time_format(ReceiptSummary.time, "%H") as hour',
+                'time_format(ReceiptSummary.visiting_time, "%H") as hour',
                 'sum(ReceiptSummary.total) as total',
                 'sum(ReceiptSummary.tax) as tax',
                 'sum(ReceiptSummary.visitors) as visitors',
