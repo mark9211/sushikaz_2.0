@@ -501,3 +501,12 @@ create table order_summaries(
 	created datetime default null,
 	modified datetime default null
 );
+
+create table secret_keys(
+	id int not null primary key auto_increment,
+	name VARCHAR(255),
+	token text,
+	status enum('active', 'deleted') default 'active',
+	created datetime default null,
+	modified datetime default null
+);

@@ -8,9 +8,7 @@
 class NotificationComponent extends Component {
 
     # Slack通知
-    public function slack_notify($text){
-        $channel = '#notification';
-        $token = 'xoxp-146567905312-147341900148-329012369781-7346deae97f08dd86eef27c06fa3036f';
+    public function slack_notify($text, $channel, $token){
         # エンコード
         $text = urlencode($text);
         $channel = urlencode($channel);
