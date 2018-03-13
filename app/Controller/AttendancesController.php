@@ -7,6 +7,9 @@
  */
 class AttendancesController extends AppController{
 
+	# 使用コンポーネント
+	public $components = array('Notification');
+
 	#共通スクリプト
 	public function beforeFilter(){
 		parent::beforeFilter();
@@ -308,6 +311,10 @@ class AttendancesController extends AppController{
 					*/
 				}
 			}
+			# Slack通知
+			$text = $this->myData['Location']['name'].$this->request->data['working_day']."勤怠データが送信されました";
+			$this->Notification->slack_notify($text);
+			# Redirect
 			$this->Session->setFlash("勤怠管理を受け付けました。", 'sessions/flash_success');
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
 		}

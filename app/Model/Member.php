@@ -29,7 +29,7 @@ class Member extends AppModel {
 		)
 	);
 
-	#従業員検索（勤務地別）
+	#従業員検索（引数:location_id）
 	public function getMemberByLocationId($location_id){
 		$members = $this->find('all', array(
 			"conditions" => array("Member.location_id"=>$location_id)
