@@ -495,7 +495,10 @@ class SalesController extends AppController{
 				),
 				'order' => Array('AttendanceResult.attendance_start' => 'asc')
 			));
-			#勤務時間帯挿入
+			# 総労働時間計算
+			$working_hours = $this->AttendanceResult->daily_total_working_hours($location['Location']['id'], $working_day);
+			$this->set('working_hours', $working_hours);
+			#勤務時間帯挿入（ランチorディナー）
 			$new_attendance_results = array();
 			foreach($attendance_results as $attendance_result){
 				$attendance_result['timezone'] = $this->AttendanceResult->judgeLunchDinner($attendance_result);

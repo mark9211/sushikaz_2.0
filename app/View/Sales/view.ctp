@@ -279,21 +279,6 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 				<div class="col-md-12">
 					<!-- Begin stat blocks -->
 					<div class="row">
-						<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
-							<div class="dashboard-stat grey">
-								<div class="visual">
-									<i class="fa fa-spinner"></i>
-								</div>
-								<div class="details">
-									<div class="number">
-										<?if(isset($other_informations)){echo $other_informations['OtherInformation']['weather'];}?>
-									</div>
-									<div class="desc">
-										天気
-									</div>
-								</div>
-							</div>
-						</div>
 						<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 							<div class="dashboard-stat green">
 								<div class="visual">
@@ -320,6 +305,21 @@ echo $this->Html->script('assets/global/plugins/bootstrap-datepaginator/bootstra
 									</div>
 									<div class="desc">
 										人件費率
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+							<div class="dashboard-stat grey">
+								<div class="visual">
+									<i class="fa fa-spinner"></i>
+								</div>
+								<div class="details">
+									<div class="number">
+										<?if(isset($working_hours)){echo $working_hours['total'];}?> h
+									</div>
+									<div class="desc">
+										総労働時間
 									</div>
 								</div>
 							</div>

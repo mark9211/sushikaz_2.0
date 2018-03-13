@@ -100,4 +100,17 @@ class AttendanceResult extends AppModel {
 		return $num;
 	}
 
+	# 日次総労働時間取得
+	public function daily_total_working_hours($location_id, $working_day){
+		$result = $this->find('all', array(
+			'fields' => array(
+				'sum(AttendanceResult.hours) as t_hours',
+				'sum(AttendanceResult.late_hours) as t_late_hours',
+				'sum(AttendanceResult.hours + AttendanceResult.late_hours) as total',
+			),
+			'conditions' => array('AttendanceResult.location_id' => $location_id, 'AttendanceResult.working_day' => $working_day),
+		));
+		return $result[0][0];
+	}
+
 }
