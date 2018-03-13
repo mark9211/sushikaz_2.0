@@ -1655,6 +1655,7 @@ class SalesController extends AppController{
 			$members = $this->Attendance->find('all', array(
 				'conditions' => array('Attendance.location_id' => $location['Location']['id'], 'Attendance.working_day' => $working_day, 'Member.type_id' => $member_type_id, 'Member.position_id' => $member_position_id),
 				'group' => array('Member.id'),
+				'order' => array('Attendance.time'),
 			));
 			$line_num = 25;
 			$this->work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day);
@@ -1664,6 +1665,7 @@ class SalesController extends AppController{
 			$members = $this->Attendance->find('all', array(
 				'conditions' => array('Attendance.location_id' => $location['Location']['id'], 'Attendance.working_day' => $working_day, 'Member.type_id' => $member_type_id, 'Member.position_id' => $member_position_id),
 				'group' => array('Member.id'),
+				'order' => array('Attendance.time'),
 			));
 			$line_num = 15;
 			$this->work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day);
@@ -1673,6 +1675,7 @@ class SalesController extends AppController{
 			$members = $this->Attendance->find('all', array(
 				'conditions' => array('Attendance.location_id' => $location['Location']['id'], 'Attendance.working_day' => $working_day, 'Member.type_id' => $member_type_id, 'Member.position_id' => $member_position_id),
 				'group' => array('Member.id'),
+				'order' => array('Attendance.time'),
 			));
 			$line_num = 5;
 			$this->work_schedule_func($line_num, $members, $h_arr, $m_arr, $obj, $location, $working_day);
