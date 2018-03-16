@@ -12,7 +12,7 @@ class NotificationComponent extends Component {
         # エンコード
         $text = urlencode($text);
         $channel = urlencode($channel);
-        $url = "https://slack.com/api/chat.postMessage?token=$token&channel=$channel&text=$text&as_user=true";
+        $url = "https://slack.com/api/chat.postMessage?token=$token&channel=$channel&text=$text";
         file_get_contents($url);
     }
 
