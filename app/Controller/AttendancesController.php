@@ -92,7 +92,8 @@ class AttendancesController extends AppController{
 			$this->set('working_day', $working_day);
 			#従業員取得
 			$members=$this->Member->find('all', array(
-				'conditions' => array('Member.location_id' => $location_id, 'Member.status' => 'active')
+				'conditions' => array('Member.location_id' => $location_id, 'Member.status' => 'active'),
+				'order' => array('Member.type_id', 'Member.post_id', 'Member.id'),
 			));
 			$arr = array();
 			foreach($members as $member){
