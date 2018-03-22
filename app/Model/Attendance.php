@@ -116,32 +116,27 @@ class Attendance extends AppModel {
 		return $time;
 	}
 
-	#時間差分計算（引数：yyyy-mm-dd hh:ii:ss ２つ）
+	# 時間差分計算（引数：yyyy-mm-dd hh:ii:ss ２つ）
 	public function twoDiffCalculator($working_day, $check_in_time, $check_out_time){
-		#出勤と休憩開始と22時
+		# 返り値
+		$hours = array('normal_hours' => 0, 'late_hours' => 0, 'max_hours' => 0);
+		# 出勤と休憩開始
 		$start_time = strtotime("$check_in_time");
 		$end_time = strtotime("$check_out_time");
+		$hours['max_hours'] = ($end_time - $start_time) / (60 * 60);
+		# 深夜時間判定
 		$ten_hours = strtotime("$working_day 22:00:00");
-		#深夜時間判定
 		if($start_time > $ten_hours){
 			$late_hours = ($end_time - $start_time) / (60 * 60);
-			$hours = array(
-				'normal_hours' => 0,
-				'late_hours' => $late_hours
-			);
+			$hours['late_hours'] = $late_hours;
 		}elseif($end_time > $ten_hours){
 			$normal_hours = ($ten_hours - $start_time) / (60 * 60);
 			$late_hours = ($end_time - $ten_hours) / (60 * 60);
-			$hours = array(
-				'normal_hours' => $normal_hours,
-				'late_hours' => $late_hours
-			);
+			$hours['normal_hours'] = $normal_hours;
+			$hours['late_hours'] = $late_hours;
 		}else{
 			$normal_hours = ($end_time - $start_time) / (60 * 60);
-			$hours = array(
-				'normal_hours' => $normal_hours,
-				'late_hours' => 0
-			);
+			$hours['normal_hours'] = $normal_hours;
 		}
 		#マイナス値エラー
 		if($hours['normal_hours']<0||$hours['late_hours']<0){
@@ -155,77 +150,99 @@ class Attendance extends AppModel {
 
 	#時間差分計算（引数：00:004つ）
 	public function fourDiffCalculator($working_day,$check_in_time,$break_in_time,$break_out_time,$check_out_time){
+		# 返り値
+		$hours = array('normal_hours' => 0, 'late_hours' => 0, 'max_hours' => 0);
 		#出勤と休憩開始
 		$start_time = strtotime($check_in_time);
 		$break_start_time = strtotime($break_in_time);
 		#休憩終了と退勤
 		$break_end_time = strtotime($break_out_time);
 		$end_time = strtotime($check_out_time);
-		$ten_hours = strtotime("$working_day 22:00:00");
+		$hours['max_hours'] = ($end_time - $start_time) / (60 * 60);
 		#深夜時間判定
+		$ten_hours = strtotime("$working_day 22:00:00");
 		if($start_time > $ten_hours){
 			$hours_one = ($break_start_time - $start_time) / (60 * 60);
 			$hours_two = ($end_time - $break_end_time) / (60 * 60);
 			$late_hours = $hours_one + $hours_two;
-			$hours = array(
-				'normal_hours' => 0,
-				'late_hours' => $late_hours
-			);
+			$hours['late_hours'] = $late_hours;
 		}elseif($break_start_time > $ten_hours){
 			$normal_hours = ($ten_hours - $start_time) / (60 * 60);
 			$hours_one = ($break_start_time - $ten_hours) / (60 * 60);
 			$hours_two = ($end_time - $break_end_time) / (60 * 60);
 			$late_hours = $hours_one + $hours_two;
-			$hours = array(
-				'normal_hours' => $normal_hours,
-				'late_hours' => $late_hours
-			);
+			$hours['normal_hours'] = $normal_hours;
+			$hours['late_hours'] = $late_hours;
 		}elseif($break_end_time > $ten_hours){
 			$normal_hours = ($break_start_time - $start_time) / (60 * 60);
 			$late_hours = ($end_time - $break_end_time) / (60 * 60);
-			$hours = array(
-				'normal_hours' => $normal_hours,
-				'late_hours' => $late_hours
-			);
+			$hours['normal_hours'] = $normal_hours;
+			$hours['late_hours'] = $late_hours;
 		}elseif($end_time > $ten_hours){
 			$hours_one = ($break_start_time - $start_time) / (60 * 60);
 			$hours_two = ($ten_hours - $break_end_time) / (60 * 60);
 			$normal_hours = $hours_one + $hours_two;
 			$late_hours = ($end_time - $ten_hours) / (60 * 60);
-			$hours = array(
-				'normal_hours' => $normal_hours,
-				'late_hours' => $late_hours
-			);
+			$hours['normal_hours'] = $normal_hours;
+			$hours['late_hours'] = $late_hours;
 		}else{
 			$hours_one = ($break_start_time - $start_time) / (60 * 60);
 			$hours_two = ($end_time - $break_end_time) / (60 * 60);
 			$normal_hours = $hours_one + $hours_two;
-			$hours = array(
-				'normal_hours' => $normal_hours,
-				'late_hours' => 0
-			);
+			$hours['normal_hours'] = $normal_hours;
 		}
 		#マイナス値エラー
 		if($hours['normal_hours']<0||$hours['late_hours']<0){
 			debug($hours);debug($working_day);
 			debug($check_in_time);debug($break_in_time);debug($break_out_time);debug($check_out_time);
 			debug("時間が正しくありません。もう一度やり直してください。");
-			//exit;
+			exit;
 		}
 		return $hours;
 	}
 
 	#時間差分計算③
 	public function diffCalculator($working_day,$check_in_time,$check_out_time, $break_arr){
-		#返り値
-		$hours = array('normal_hours' => 0, 'late_hours' => 0);
-		#出勤and退勤
+		#　返り値
+		$hours = array('normal_hours' => 0, 'late_hours' => 0, 'max_hours' => 0);
+		#　出勤and退勤
 		$start_time = strtotime("$check_in_time");
 		$end_time = strtotime("$check_out_time");
-		#深夜時間
+		$hours['max_hours'] = ($end_time - $start_time) / (60 * 60);
+		#　深夜時間
 		$ten_hours = strtotime("$working_day 22:00:00");
-		#休憩があるかないか
-		if($break_arr==null){
+		# 休憩時間配列が空でなくかつcount数が偶数だったら、休憩加味して計算
+		if($break_arr!=null && count($break_arr)%2==0){
+			$arr = array();$arr2 = array();$i=0;
+			foreach($break_arr as $break){
+				$arr[] = strtotime("$break");
+			}
+			array_unshift($arr, $start_time);array_push($arr, $end_time);
+			#②コイチで分配
+			foreach($arr as $a){
+				$i++;$s=ceil($i/2);
+				$arr2[$s][] = $a;
+			}
+			foreach($arr2 as $a){
+				#深夜時間判定
+				if($a[0] > $ten_hours){
+					$late_hours = ($a[1] - $a[0]) / (60 * 60);
+					$hours['late_hours'] += $late_hours;
+				}
+				elseif($a[1] > $ten_hours){
+					$normal_hours = ($ten_hours - $a[0]) / (60 * 60);
+					$late_hours = ($a[1] - $ten_hours) / (60 * 60);
+					$hours['normal_hours'] += $normal_hours;
+					$hours['late_hours'] += $late_hours;
+				}
+				else{
+					$normal_hours = ($a[1] - $a[0]) / (60 * 60);
+					$hours['normal_hours'] += $normal_hours;
+				}
+			}
+		}
+		# 配列が空or休憩時間配列のcount数が奇数の場合、休憩加味せず計算
+		else{
 			#深夜時間判定
 			if($start_time > $ten_hours){
 				$late_hours = ($end_time - $start_time) / (60 * 60);
@@ -238,41 +255,6 @@ class Attendance extends AppModel {
 			}else{
 				$normal_hours = ($end_time - $start_time) / (60 * 60);
 				$hours['normal_hours'] = $normal_hours;
-			}
-		}
-		else{
-			#配列の個数が偶数だったら
-			if(count($break_arr)%2==0){
-				$arr = array();$arr2 = array();$i=0;
-				foreach($break_arr as $break){
-					$arr[] = strtotime("$break");
-				}
-				array_unshift($arr, $start_time);array_push($arr, $end_time);
-				#②コイチで分配
-				foreach($arr as $a){
-					$i++;$s=ceil($i/2);
-					$arr2[$s][] = $a;
-				}
-				foreach($arr2 as $a){
-					#深夜時間判定
-					if($a[0] > $ten_hours){
-						$late_hours = ($a[1] - $a[0]) / (60 * 60);
-						$hours['late_hours'] += $late_hours;
-					}
-					elseif($a[1] > $ten_hours){
-						$normal_hours = ($ten_hours - $a[0]) / (60 * 60);
-						$late_hours = ($a[1] - $ten_hours) / (60 * 60);
-						$hours['normal_hours'] += $normal_hours;
-						$hours['late_hours'] += $late_hours;
-					}
-					else{
-						$normal_hours = ($a[1] - $a[0]) / (60 * 60);
-						$hours['normal_hours'] += $normal_hours;
-					}
-				}
-			}
-			else{
-				return null;
 			}
 		}
 		return $hours;

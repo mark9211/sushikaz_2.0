@@ -1,3 +1,3 @@
 <div class="alert alert-danger">
-    <?php echo $message; ?>
+    <strong>Error!</strong><?= $message; ?>
 </div>

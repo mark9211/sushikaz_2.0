@@ -358,6 +358,7 @@ class BreakdownsController extends AppController{
                                 elseif(strpos($o[54],'ドリンク')!==false){
                                     $brand = $this->judge_by_table_number($o);
                                 }
+                                else{}
                                 # breakdown
                                 if(strpos($o[55],'ランチ')!==false){
                                     $flag = "ランチ";

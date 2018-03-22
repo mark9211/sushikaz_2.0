@@ -123,8 +123,49 @@ class AttendancesController extends AppController{
 					}
 				}
 			}
+			# AlertMSG（1:danger, 2:warning）
+			$msg = [];$work_hours = [];
+			if($arr!=null){
+				foreach($arr as $key => $a){
+					# 退勤時間未入力:1
+					if(!array_key_exists(2, $a)){
+						$msg[$key][1][] = "退勤時間未入力";
+					}
+					# 休憩終了未入力:1
+					if(array_key_exists('break', $a) && count($a['break'])%2!=0){
+						$msg[$key][1][] = "休憩終了未入力";
+					}
+					if(!isset($msg[$key][1])){
+						# 実働時間計算
+						$check_in_time = $a[1]['Attendance']['time'];
+						$check_out_time = $a[2]['Attendance']['time'];
+						$break_arr = [];
+						if(isset($a['break'])){
+							foreach($a['break'] as $break){ $break_arr[] = $break['Attendance']['time']; }
+						}
+						$hours = $this->Attendance->diffCalculator($working_day,$check_in_time,$check_out_time,$break_arr);
+						if($hours!=null){
+							$work_hours[$key] = $hours;
+							$total = $hours['normal_hours'] + $hours['late_hours'];
+							$rest = $hours['max_hours'] - $total;
+							# 規定労働時間超過
+							if($total>=12){
+								$msg[$key][2][] = "規定労働時間超過";
+							}
+							if($total>=8&&$rest<1){
+								$msg[$key][2][] = "1時間以上休憩必要";
+							}
+							elseif($total>=6&&$rest<0.75){
+								$msg[$key][2][] = "45分以上休憩必要";
+							}
+						}
+					}
+				}
+			}
 			$this->set('attendances', $arr);
 			$this->set('members', $members);
+			$this->set('msg', $msg);
+			$this->set('work_hours', $work_hours);
 		}
 	}
 
@@ -152,7 +193,7 @@ class AttendancesController extends AppController{
 		}
 	}
 
-	#追加andResult
+	# 更新・追加 & AttendanceResult作成
 	public function add(){
 		if($this->request->is('post')){
 			#debug($this->request->data);exit;
@@ -168,9 +209,15 @@ class AttendancesController extends AppController{
 						'id' => key($attendance_result['attendance_start']),
 						'time' => $check_in_time
 					));
-					$this->Attendance->create(false);$this->Attendance->save($data);
-					#new退勤
+					$this->Attendance->create(false);
+					$this->Attendance->save($data);
+					#退勤
 					if(isset($attendance_result['attendance_end']['new'])){
+						# 退勤時間が見つからない記録が一件見つかった時点でRedirect
+						if($attendance_result['attendance_end']['new']==null){
+							$this->Session->setFlash("勤怠送信失敗しました。理由：ID".$key."の退勤時間が入力されていません", 'flash_error');
+							$this->redirect($this->referer());
+						}
 						$data = array('Attendance' => array(
 							'location_id' => $location_id,
 							'member_id' => $key,
@@ -178,7 +225,8 @@ class AttendancesController extends AppController{
 							'type_id' => 2,
 							'time' => $attendance_result['attendance_end']['new']
 						));
-						$this->Attendance->create(false);$this->Attendance->save($data);
+						$this->Attendance->create(false);
+						$this->Attendance->save($data);
 						$check_out_time = $attendance_result['attendance_end']['new'];
 					}else{
 						$check_out_time = $attendance_result['attendance_end'][key($attendance_result['attendance_end'])];
@@ -186,54 +234,45 @@ class AttendancesController extends AppController{
 							'id' => key($attendance_result['attendance_end']),
 							'time' => $check_out_time
 						));
-						$this->Attendance->create(false);$this->Attendance->save($data);
+						$this->Attendance->create(false);
+						$this->Attendance->save($data);
 					}
 					#休憩時間
-					$break_arr = array();
-					if(isset($attendance_result['break']['new'])){
-						$i=0;
-						foreach($attendance_result['break']['new'] as $break){
-							if($break!=null){
-								$i++;
-								if($i%2!=0){
-									$data = array('Attendance' => array(
-										'location_id' => $location_id,
-										'member_id' => $key,
-										'working_day' => $working_day,
-										'type_id' => 3,
-										'time' => $break
-									));
-								}
-								else{
-									$data = array('Attendance' => array(
-										'location_id' => $location_id,
-										'member_id' => $key,
-										'working_day' => $working_day,
-										'type_id' => 4,
-										'time' => $break
-									));
-								}
-								$this->Attendance->create(false);$this->Attendance->save($data);
-								$break_arr[] = $break;
-							}
+					$break_arr = [];
+					if(isset($attendance_result['break']['id'])){
+						foreach($attendance_result['break']['id'] as $id => $break){
+							$data = array('Attendance' => array(
+								'id' => $id,
+								'time' => $break
+							));
+							$this->Attendance->create(false);
+							$this->Attendance->save($data);
+							$break_arr[] = $break;
 						}
 					}
-					else{
-						# 2017/05/11
-						if($attendance_result['break']!=null){
-							if(count($attendance_result['break'])%2!=0){ array_pop($attendance_result['break']); }
-							foreach($attendance_result['break'] as $id => $break){
+					if(isset($attendance_result['break']['new'])){
+						foreach($attendance_result['break']['new'] as $type_id => $break){
+							if($break!=null){
 								$data = array('Attendance' => array(
-									'id' => $id,
+									'location_id' => $location_id,
+									'member_id' => $key,
+									'working_day' => $working_day,
+									'type_id' => $type_id,
 									'time' => $break
 								));
-								$this->Attendance->create(false);$this->Attendance->save($data);
+								$this->Attendance->create(false);
+								$this->Attendance->save($data);
 								$break_arr[] = $break;
 							}
 						}
 					}
+					# 退勤時間が見つからない記録が一件見つかった時点でRedirect
+					if($break_arr!=null && count($break_arr)%2!=0){
+						$this->Session->setFlash("勤怠送信失敗しました。理由：ID".$key."の休憩終了時間が入力されていません", 'flash_error');
+						$this->redirect($this->referer());
+					}
 					#時間数計算
-					$hours = $this->Attendance->diffCalculator($working_day,$check_in_time,$check_out_time, $break_arr);
+					$hours = $this->Attendance->diffCalculator($working_day,$check_in_time,$check_out_time,$break_arr);
 					#現時点での給与
 					$member = $this->Member->findById($key);
 					#既存かどうか
@@ -249,6 +288,7 @@ class AttendancesController extends AppController{
 							'attendance_end' => $check_out_time,
 							'hours' => $hours['normal_hours'],
 							'late_hours' => $hours['late_hours'],
+							'break' => $hours['max_hours'] - $hours['normal_hours'] - $hours['late_hours'],
 							'makanai' => $attendance_result['makanai'],
 							'day_hourly_wage' => $member['Member']['hourly_wage']
 						));
@@ -259,6 +299,7 @@ class AttendancesController extends AppController{
 							'attendance_end' => $check_out_time,
 							'hours' => $hours['normal_hours'],
 							'late_hours' => $hours['late_hours'],
+							'break' => $hours['max_hours'] - $hours['normal_hours'] - $hours['late_hours'],
 							'makanai' => $attendance_result['makanai']
 						));
 					}
@@ -292,23 +333,13 @@ class AttendancesController extends AppController{
 							'attendance_end' => $new_attendance_result['attendance_end'],
 							'hours' => $hours['normal_hours'],
 							'late_hours' => $hours['late_hours'],
+							'break' => $hours['max_hours'] - $hours['normal_hours'] - $hours['late_hours'],
 							'makanai' => $new_attendance_result['makanai'],
 							'day_hourly_wage' => $member['Member']['hourly_wage']
 						));
 						$this->AttendanceResult->create(false);
 						if(!$this->AttendanceResult->save($data)){ var_dump($data);var_dump($this->AttendanceResult->validationErrors); }
-					}/*
-					else{
-						$data = array('AttendanceResult' => array(
-							'id' => $already_result['AttendanceResult']['id'],
-							'attendance_start' => $new_attendance_result['attendance_start'],
-							'attendance_end' => $new_attendance_result['attendance_end'],
-							'hours' => $hours['normal_hours'],
-							'late_hours' => $hours['late_hours']
-						));
-						$this->AttendanceResult->save($data);
 					}
-					*/
 				}
 			}
 			# Slack通知
@@ -317,7 +348,7 @@ class AttendancesController extends AppController{
 			$secret_key = $this->SecretKey->getByApiName("slack");
 			$this->Notification->slack_notify($text, $channel, $secret_key['SecretKey']['token']);
 			# Redirect
-			$this->Session->setFlash("勤怠管理を受け付けました。", 'sessions/flash_success');
+			$this->Session->setFlash("勤怠管理を受け付けました。", 'flash_success');
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
 		}
 	}
