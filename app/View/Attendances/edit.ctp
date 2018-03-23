@@ -247,7 +247,7 @@ echo $this->Html->script('assets/admin/pages/scripts/components-pickers.js');
 																					<label class="control-label">休憩終了<?if(count($attendance['break'])==1){echo 1;}elseif(count($attendance['break'])==3){ echo 2;}?></label>
 																					<div class="input-group date form_datetime">
 																						<span class="input-group-btn"><button class="btn default date-set" type="button"><i class="fa fa-calendar"></i></button></span>
-																						<input type="text" class="form-control" name="AttendanceResult[<?= $key;?>][break][new][4][]" value="">
+																						<input type="text" class="form-control" name="AttendanceResult[<?= $key;?>][break][new][4]" value="">
 																					</div>
 																				</div>
 																			</div>
