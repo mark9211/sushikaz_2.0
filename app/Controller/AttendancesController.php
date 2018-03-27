@@ -359,7 +359,7 @@ class AttendancesController extends AppController{
 			$text = $this->myData['Location']['name'].$this->request->data['working_day']."勤怠データが送信されました";
 			$channel = "#notification";
 			$secret_key = $this->SecretKey->getByApiName("slack");
-			#$this->Notification->slack_notify($text, $channel, $secret_key['SecretKey']['token']);
+			$this->Notification->slack_notify($text, $channel, $secret_key['SecretKey']['token']);
 			# Redirect
 			$this->Session->setFlash("勤怠管理を受け付けました。", 'flash_success');
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
