@@ -141,6 +141,10 @@ class AttendancesController extends AppController{
 						$check_in_time = $a[1]['Attendance']['time'];
 						$check_out_time = $a[2]['Attendance']['time'];
 						$break_arr = [];
+						# 出勤時間 > 退勤時間
+						if(strtotime($check_in_time)>strtotime($check_out_time)){
+							$msg[$key][1][] = "出勤/退勤時間不正";
+						}
 						if(isset($a['break'])){
 							foreach($a['break'] as $break){ $break_arr[] = $break['Attendance']['time']; }
 						}
@@ -153,6 +157,7 @@ class AttendancesController extends AppController{
 							if($total>=12){
 								$msg[$key][2][] = "規定労働時間超過";
 							}
+							# 休憩時間不足
 							if($total>=8&&$rest<1){
 								$msg[$key][2][] = "1時間以上休憩必要";
 							}
@@ -238,6 +243,11 @@ class AttendancesController extends AppController{
 						$this->Attendance->create(false);
 						$this->Attendance->save($data);
 					}
+					# 出勤時間>退勤時間である記録が一件見つかった時点でRedirect
+					if(strtotime($check_in_time)>strtotime($check_out_time)){
+						$this->Session->setFlash("勤怠送信失敗しました。理由：ID".$key."の出勤または退勤時間が不正です", 'flash_error');
+						$this->redirect($this->referer());
+					}
 					#休憩時間
 					$break_arr = [];
 					if(isset($attendance_result['break']['id'])){
@@ -272,6 +282,8 @@ class AttendancesController extends AppController{
 						$this->Session->setFlash("勤怠送信失敗しました。理由：ID".$key."の休憩終了時間が入力されていません", 'flash_error');
 						$this->redirect($this->referer());
 					}
+					# 休憩時間配列を昇順でソート
+					sort($break_arr);
 					#時間数計算
 					$hours = $this->Attendance->diffCalculator($working_day,$check_in_time,$check_out_time,$break_arr);
 					#現時点での給与
@@ -347,7 +359,7 @@ class AttendancesController extends AppController{
 			$text = $this->myData['Location']['name'].$this->request->data['working_day']."勤怠データが送信されました";
 			$channel = "#notification";
 			$secret_key = $this->SecretKey->getByApiName("slack");
-			$this->Notification->slack_notify($text, $channel, $secret_key['SecretKey']['token']);
+			#$this->Notification->slack_notify($text, $channel, $secret_key['SecretKey']['token']);
 			# Redirect
 			$this->Session->setFlash("勤怠管理を受け付けました。", 'flash_success');
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
