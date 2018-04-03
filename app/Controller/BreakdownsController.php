@@ -291,7 +291,6 @@ class BreakdownsController extends AppController{
                             }
                             if($total!=0){
                                 $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity);
-                                debug($arr);exit;
                             }
                         }
                     }
