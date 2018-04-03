@@ -131,6 +131,7 @@ class BreakdownsController extends AppController{
                         ));
                         $this->ReceiptSummary->create(false);
                         $this->ReceiptSummary->save($insert);
+                        exit;
                     }
                 }
             }
