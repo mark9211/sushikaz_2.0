@@ -129,6 +129,7 @@ class BreakdownsController extends AppController{
                             'time' => $d[12],
                             'visiting_time' => $d[14],
                         ));
+                        debug($insert);exit;
                         $this->ReceiptSummary->create(false);
                         $this->ReceiptSummary->save($insert);
                     }
