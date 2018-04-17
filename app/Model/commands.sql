@@ -484,7 +484,7 @@ create table receipt_summaries(
 	modified datetime default null
 );
 
-#2018/02/19
+#20180219
 create table order_summaries(
 	id int not null primary key auto_increment,
 	location_id int NOT NULL,
@@ -506,6 +506,16 @@ create table secret_keys(
 	id int not null primary key auto_increment,
 	name VARCHAR(255),
 	token text,
+	status enum('active', 'deleted') default 'active',
+	created datetime default null,
+	modified datetime default null
+);
+
+#20180414
+create table attendance_update_logs(
+	id int not null primary key auto_increment,
+	attendance_id int,
+	before_time datetime,
 	status enum('active', 'deleted') default 'active',
 	created datetime default null,
 	modified datetime default null

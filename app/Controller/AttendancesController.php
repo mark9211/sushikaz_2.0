@@ -73,6 +73,8 @@ class AttendancesController extends AppController{
 				'time' => $time
 			));
 			$this->Attendance->save($data);
+			# 更新前ログ
+			$this->createLog($this->Attendance->getLastInsertID());
 			$this->Session->setFlash("完了しました！", 'sessions/flash_success');
 			$this->redirect(array('controller'=>'locations', 'action'=>'index'));
 		}
@@ -209,7 +211,7 @@ class AttendancesController extends AppController{
 			if(isset($this->request->data['AttendanceResult'])){
 				foreach($this->request->data['AttendanceResult'] as $key => $attendance_result){
 					//////////Update/////////////////////////////////////Update///////////////////////////
-					#出勤
+					# 出勤
 					$check_in_time = $attendance_result['attendance_start'][key($attendance_result['attendance_start'])];
 					$data = array('Attendance' => array(
 						'id' => key($attendance_result['attendance_start']),
@@ -217,7 +219,7 @@ class AttendancesController extends AppController{
 					));
 					$this->Attendance->create(false);
 					$this->Attendance->save($data);
-					#退勤
+					# 退勤
 					if(isset($attendance_result['attendance_end']['new'])){
 						# 退勤時間が見つからない記録が一件見つかった時点でRedirect
 						if($attendance_result['attendance_end']['new']==null){
@@ -364,6 +366,16 @@ class AttendancesController extends AppController{
 			$this->Session->setFlash("勤怠管理を受け付けました。", 'flash_success');
 			$this->redirect(array('controller' => 'sales', 'action' => 'view', '?' => array('date' => $this->request->data['working_day'])));
 		}
+	}
+
+	private function createLog($attendance_id){
+		$b_attendance = $this->Attendance->findById($attendance_id);
+		$data = array('AttendanceUpdateLog' => array(
+			'attendance_id' => $b_attendance['Attendance']['id'],
+			'before_time' => $b_attendance['Attendance']['time'],
+		));
+		$this->AttendanceUpdateLog->create(false);
+		$this->AttendanceUpdateLog->save($data);
 	}
 
 }

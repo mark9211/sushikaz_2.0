@@ -41,7 +41,7 @@ class AppController extends Controller {
 		"CouponType", "OtherDiscount", "OtherType", "Expense", "ExpenseType", "OtherInformation", "SlipNumber", "Attendance", "AttendanceResult",
 		"AttendanceType", "PartyInformation", "Inventory", "Payroll", "Target", "PayableAccount", "Holiday", "SalesLunch", "SalesAttribute", "AddCash",
 		"Member", "MemberPost", "MemberPosition", "MemberType", "Passcode", "AccountType", "Association", "ReceiptSummary", "PartyType", "SlipType",
-		"InventoryType", "OrderSummary", "SecretKey"
+		"InventoryType", "OrderSummary", "SecretKey", "AttendanceUpdateLog"
 	);
 
 	# 共通処理
