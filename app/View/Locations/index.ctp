@@ -26,7 +26,7 @@ echo $this->Html->script('js/popover.js');
 							<i class="fa fa-clock-o"></i>
 							<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'attendances', 'action'=>'index'));?>"'>
 								<div class="square-bg">
-									<?echo $this->Html->image('img/calendar-512.png', array('width' => '100%','style' => 'background-color:#ff4081'));?>
+									<?= $this->Html->image('img/calendar-512.png', array('width' => '100%','style' => 'background-color:#ff4081'));?>
 								</div>
 								<div class="square-header">
 									<p class="title">Time Card</p>
@@ -44,7 +44,7 @@ echo $this->Html->script('js/popover.js');
 									<i class="fa fa-globe"></i>
 									<a href="#responsive_1" data-toggle="modal">
 										<div class="square-bg">
-											<?echo $this->Html->image('img/cast.png', array('width'=>'100%','style' => 'background-color:#1b39a8'));?>
+											<?= $this->Html->image('img/cast.png', array('width'=>'100%','style' => 'background-color:#1b39a8'));?>
 										</div>
 										<div class="square-header">
 											<p class="title">Attendance</p>
@@ -60,13 +60,13 @@ echo $this->Html->script('js/popover.js');
 					</div>
 					<div class="col-md-6">
 						<div class="row">
-							<div class="col-md-12">
+							<div class="col-md-6">
 								<div class="square">
 									<i class="fa fa-calendar-o"></i>
 									<?$date = date('Y-m-d', strtotime('-1 day'));?>
 									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'index', '?' => array('date' => $date)));?>"'>
 										<div class="square-bg" style="background-color:#ab47bc">
-											<?echo $this->Html->image('img/design-minutes.png', array('width'=>'50%','height'=>'50%','style' => 'margin: auto;'));?>
+											<?= $this->Html->image('img/design-minutes.png', array('width'=>'50%','height'=>'50%','style' => 'margin: auto;'));?>
 										</div>
 										<div class="square-header">
 											<p class="title">Entry</p>
@@ -78,12 +78,12 @@ echo $this->Html->script('js/popover.js');
 									</a>
 								</div>
 							</div>
-							<div class="col-md-12">
-								<div class="square is-loaded">
+							<div class="col-md-6">
+								<div class="square">
 									<i class="fa fa-group"></i>
 									<a onclick='location.href="<?echo $this->Html->url(array('controller'=>'sales', 'action'=>'view', '?' => array('date' => $date)));?>"'>
 										<div class="square-bg" style="background-color:#ff5252;">
-											<?echo $this->Html->image('img/materialreel.png', array('width'=>'50%','height'=>'50%', 'style' => 'margin: auto;'));?>
+											<?= $this->Html->image('img/materialreel.png', array('width'=>'50%','height'=>'50%', 'style' => 'margin: auto;'));?>
 										</div>
 										<i class="fa fa-clock-o"></i>
 										<div class="square-header">
@@ -98,10 +98,10 @@ echo $this->Html->script('js/popover.js');
 							</div>
 							<div class="col-md-6">
 								<div class="square">
-									<i class="fa fa-group "></i>
+									<i class="fa fa-group"></i>
 									<a href="#responsive_2" data-toggle="modal">
 										<div class="square-bg">
-											<?echo $this->Html->image('img/doodlearchive.png', array('width'=>'100%','style' => 'background-color:#ffcd40'));?>
+											<?= $this->Html->image('img/notebook-512.png', array('width'=>'100%','style' => 'background-color:#ffcd40'));?>
 										</div>
 										<i class="fa fa-clock-o"></i>
 										<div class="square-header">
@@ -116,10 +116,10 @@ echo $this->Html->script('js/popover.js');
 							</div>
 							<div class="col-md-6">
 								<div class="square">
-									<i class="fa fa-group "></i>
+									<i class="fa fa-group"></i>
 									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'breakdowns', 'action'=>'index'));?>"'>
 										<div class="square-bg">
-											<?echo $this->Html->image('img/webdesigner.png', array('width'=>'100%','style' => 'background-color:#8bc34a'));?>
+											<?= $this->Html->image('img/webdesigner.png', array('width'=>'100%','style' => 'background-color:#8bc34a'));?>
 										</div>
 										<div class="square-header">
 											<p class="title">Master Submit</p>
@@ -132,6 +132,25 @@ echo $this->Html->script('js/popover.js');
 								</div>
 							</div>
 							<div class="clearfix"></div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="square">
+									<i class="fa fa-globe"></i>
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'analysis', 'action'=>'index'));?>"'>
+										<div class="square-bg">
+											<?= $this->Html->image('img/doodlearchive.png', array('width'=>'100%','style' => 'background-color:#FF9933'));?>
+										</div>
+										<div class="square-header">
+											<p class="title">Analysis</p>
+											<p class="description">各種<strong>分析</strong></p>
+										</div>
+										<div class="square-post">
+											<p class="title">各種<br/> <strong>分析<i class="fa fa-arrow-circle-o-right"></i></strong></p>
+										</div>
+									</a>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

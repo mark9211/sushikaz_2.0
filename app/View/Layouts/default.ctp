@@ -146,14 +146,14 @@
 								</li>
 								<!--
 								<li class="menu-dropdown">
-									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'sales', 'action'=>'monthly_report'));?>"'>月末報告</a>
-								</li>
-								<li class="menu-dropdown">
 									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'sales', 'action'=>'sql'));?>"'>本部送信</a>
 								</li>
 								-->
 								<li class="menu-dropdown">
 									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'breakdowns', 'action'=>'index'));?>"'>システム連携</a>
+								</li>
+								<li class="menu-dropdown">
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'analysis', 'action'=>'index'));?>"'>各種分析</a>
 								</li>
 							</ul>
 						</div>

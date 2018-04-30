@@ -20,5 +20,4 @@ class AdminController extends AppController{
 
 	}
 
-
 }
