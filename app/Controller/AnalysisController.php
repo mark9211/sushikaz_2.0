@@ -62,12 +62,13 @@ class AnalysisController extends AppController{
 	# init menus
 	private function get_menus($location_id){
 		$menus = $this->OrderSummary->find('all', array(
+			'fields' => ['OrderSummary.menu_name', 'sum(OrderSummary.price * OrderSummary.order_num) as sales'],
 			'conditions' => array(
 				'OrderSummary.location_id' => $location_id,
 				'NOT' => array( 'OrderSummary.menu_name' => '' )
 			 ),
 			'group' => array('OrderSummary.menu_name'),
-			'order' => array('OrderSummary.menu_name'),
+			'order' => array('sales DESC'),
 		));
 		return $menus;
 	}
@@ -75,6 +76,7 @@ class AnalysisController extends AppController{
 	# init breakdowns
 	private function get_brand($location_id){
 		$result = $this->OrderSummary->find('all', array(
+			'fields' => ['OrderSummary.brand_name'],
 			'conditions' => array(
 				'OrderSummary.location_id' => $location_id,
 				'NOT' => array( 'OrderSummary.brand_name' => '' )
@@ -88,6 +90,7 @@ class AnalysisController extends AppController{
 	# init breakdowns
 	private function get_breakdown($location_id){
 		$result = $this->OrderSummary->find('all', array(
+			'fields' => ['OrderSummary.breakdown_name'],
 			'conditions' => array(
 				'OrderSummary.location_id' => $location_id,
 				'NOT' => array( 'OrderSummary.breakdown_name' => '' )
@@ -185,7 +188,7 @@ class AnalysisController extends AppController{
 			),
 			'group' => array('OrderSummary.menu_name'),
 			'order' => array('cnt DESC'),
-			'limit' => 5,
+			'limit' => 10,
 		));
 		#debug($result);
 		return $result;

@@ -51,13 +51,13 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-md-3">分析開始営業日</label>
+                        <label class="control-label col-md-3">分析開始日</label>
                         <div class="col-md-9">
                             <input class="form-control input-small" type="text" name="start_date" placeholder="20180401" value="<?if(isset($menu_info)){ echo $menu_info['start_date']; }?>">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-md-3">分析終了営業日</label>
+                        <label class="control-label col-md-3">分析終了日</label>
                         <div class="col-md-9">
                             <input class="form-control input-small" type="text" name="end_date" placeholder="20180430" value="<?if(isset($menu_info)){ echo $menu_info['end_date']; }?>">
                         </div>
@@ -225,7 +225,7 @@
                                 <div class="portlet light bordered">
                                     <div class="portlet-title">
                                         <div class="caption">
-                                            <span class="caption-subject font-green bold uppercase">フードメニューBEST5</span>
+                                            <span class="caption-subject font-green bold uppercase">フードメニューBEST10</span>
                                         </div>
                                         <div class="actions"></div>
                                     </div>
@@ -261,7 +261,7 @@
                                 <div class="portlet light bordered">
                                     <div class="portlet-title">
                                         <div class="caption">
-                                            <span class="caption-subject font-green bold uppercase">ドリンクメニューBEST5</span>
+                                            <span class="caption-subject font-green bold uppercase">ドリンクメニューBEST10</span>
                                         </div>
                                         <div class="actions"></div>
                                     </div>
