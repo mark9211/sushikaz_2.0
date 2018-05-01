@@ -1,7 +1,5 @@
 <style>
-    .inputBox{
-        border: 1px #ccc solid;
-    }
+    .grayOut{ color: #aaa; }
 </style>
 <div class="container">
     <div class="portlet light">
@@ -15,7 +13,7 @@
             <form action="" class="form-horizontal form-bordered" method="post">
                 <div class="form-body">
                     <div class="form-group">
-                        <label class="control-label col-md-3">メニュー選択</label>
+                        <label class="control-label col-md-3">商品名</label>
                         <div class="col-md-9">
                             <select class="form-control input-large" name="menu_name">
                                 <?foreach($menus as $menu):?>
@@ -26,16 +24,42 @@
                             </select>
                         </div>
                     </div>
+                    <!--
+                    <div class="form-group">
+                        <label class="control-label col-md-3">ブランド名</label>
+                        <div class="col-md-9">
+                            <select class="form-control input-small" name="brand_name">
+                                <?foreach($brands as $brand):?>
+                                    <option value="<?=$brand['OrderSummary']['brand_name'];?>" <?if(isset($menu_info)&&$menu_info['brand_name']==$brand['OrderSummary']['brand_name']){ echo 'selected'; }?>>
+                                        <?=$brand['OrderSummary']['brand_name'];?>
+                                    </option>
+                                <?endforeach;?>
+                            </select>
+                        </div>
+                    </div>
+                    -->
+                    <div class="form-group">
+                        <label class="control-label col-md-3">部門名</label>
+                        <div class="col-md-9">
+                            <select class="form-control input-small" name="breakdown_name">
+                                <?foreach($breakdowns as $breakdown):?>
+                                    <option value="<?=$breakdown['OrderSummary']['breakdown_name'];?>" <?if(isset($menu_info)&&$menu_info['breakdown_name']==$breakdown['OrderSummary']['breakdown_name']){ echo 'selected'; }?>>
+                                        <?=$breakdown['OrderSummary']['breakdown_name'];?>
+                                    </option>
+                                <?endforeach;?>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="control-label col-md-3">分析開始営業日</label>
                         <div class="col-md-9">
-                            <input class="form-control input-small" type="text" name="start_date" value="<?if(isset($menu_info)){ echo $menu_info['start_date']; }?>">
+                            <input class="form-control input-small" type="text" name="start_date" placeholder="20180401" value="<?if(isset($menu_info)){ echo $menu_info['start_date']; }?>">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-md-3">分析終了営業日</label>
                         <div class="col-md-9">
-                            <input class="form-control input-small" type="text" name="end_date" value="<?if(isset($menu_info)){ echo $menu_info['end_date']; }?>">
+                            <input class="form-control input-small" type="text" name="end_date" placeholder="20180430" value="<?if(isset($menu_info)){ echo $menu_info['end_date']; }?>">
                         </div>
                     </div>
                 </div>
@@ -52,17 +76,17 @@
             <!-- END FORM-->
         </div>
     </div>
-    <?if(isset($menu_info)):?>
-        <div class="portlet light">
-            <div class="portlet-title">
-                <div class="caption">
-                    <span class="caption-subject font-green sbold uppercase">分析結果</span>
-                </div>
+    <div class="portlet light">
+        <div class="portlet-title">
+            <div class="caption">
+                <span class="caption-subject font-green sbold uppercase">分析結果</span>
             </div>
-            <div class="portlet-body form">
-                <form class="form-horizontal" role="form">
-                    <div class="form-body">
-                        <h3 class="form-section">Menu Info</h3>
+        </div>
+        <div class="portlet-body form">
+            <form class="form-horizontal" role="form">
+                <div class="form-body">
+                    <?if(isset($menu_info)&&isset($receipt_info)):?>
+                        <h3 class="form-section">Basic Info</h3>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -89,6 +113,7 @@
                                 </div>
                             </div>
                         </div>
+                        <h3 class="form-section">Menu Info</h3>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -110,13 +135,12 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-6">注文レシート数</label>
                                     <div class="col-md-6">
-                                        <p class="form-control-static"> <?=number_format($menu_info['menu_receipt_cnt']);?> </p>
+                                        <p class="form-control-static"> <?=number_format($receipt_info['menu_receipt_cnt']);?> </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">Period info</h3>
-                        <div class="row">
+                        <div class="row grayOut">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="control-label col-md-6">商品売上</label>
@@ -129,7 +153,7 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-6">商品出数</label>
                                     <div class="col-md-6">
-                                        <p class="form-control-static"> <?=number_format($menu_info['order_num']);?> </p>
+                                        <p class="form-control-static"> <?=number_format($receipt_info['quantity']);?> </p>
                                     </div>
                                 </div>
                             </div>
@@ -137,18 +161,142 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-6">注文レシート数</label>
                                     <div class="col-md-6">
-                                        <p class="form-control-static"> <?=number_format($menu_info['receipt_cnt']);?> </p>
+                                        <p class="form-control-static"> <?=number_format($receipt_info['receipt_cnt']);?> </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <h3 class="form-section">Receipt info</h3>
                         <div class="row">
-
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">平均客単</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static">¥<?=number_format(floor($receipt_info['menu_total']/$receipt_info['menu_visitors']));?></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">平均点数</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> <?=floor($receipt_info['menu_quantity']/$receipt_info['menu_visitors']*10)/10;?>品 </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">平均組人数</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> <?=floor($receipt_info['menu_visitors']/$receipt_info['menu_receipt_cnt']*10)/10;?>人 </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </form>
-            </div>
+                        <div class="row grayOut">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">平均客単</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static">¥<?=number_format(floor($receipt_info['total']/$receipt_info['visitors']));?></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">平均点数</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> <?=floor($receipt_info['quantity']/$receipt_info['visitors']*10)/10;?>品 </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">平均組人数</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> <?=floor($receipt_info['visitors']/$receipt_info['receipt_cnt']*10)/10;?>人 </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="form-section">一緒に頼まれやすいメニューランキング</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <span class="caption-subject font-green bold uppercase">フードメニューBEST10</span>
+                                        </div>
+                                        <div class="actions"></div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <div class="table-scrollable">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                <tr>
+                                                    <th> # </th>
+                                                    <th> 商品名 </th>
+                                                    <th> カテゴリ </th>
+                                                    <th> 出現回数 </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <?if($food_menus!=null):?>
+                                                <?foreach($food_menus as $key => $food_menu):?>
+                                                    <tr>
+                                                        <td> <?=$key+1;?> </td>
+                                                        <td> <?=$food_menu['OrderSummary']['menu_name'];?> </td>
+                                                        <td> <?=$food_menu['OrderSummary']['category_name'];?> </td>
+                                                        <td> <?=$food_menu[0]['cnt'];?> </td>
+                                                    </tr>
+                                                <?endforeach;?>
+                                                <?endif;?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="portlet light bordered">
+                                    <div class="portlet-title">
+                                        <div class="caption">
+                                            <span class="caption-subject font-green bold uppercase">ドリンクメニューBEST10</span>
+                                        </div>
+                                        <div class="actions"></div>
+                                    </div>
+                                    <div class="portlet-body">
+                                        <div class="table-scrollable">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                <tr>
+                                                    <th> # </th>
+                                                    <th> 商品名 </th>
+                                                    <th> カテゴリ </th>
+                                                    <th> 出現回数 </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <?if($drink_menus!=null):?>
+                                                    <?foreach($drink_menus as $key => $drink_menu):?>
+                                                        <tr>
+                                                            <td> <?=$key+1;?> </td>
+                                                            <td> <?=$drink_menu['OrderSummary']['menu_name'];?> </td>
+                                                            <td> <?=$drink_menu['OrderSummary']['category_name'];?> </td>
+                                                            <td> <?=$drink_menu[0]['cnt'];?> </td>
+                                                        </tr>
+                                                    <?endforeach;?>
+                                                <?endif;?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?endif;?>
+                </div>
+            </form>
         </div>
-    <?endif;?>
+    </div>
 </div>
