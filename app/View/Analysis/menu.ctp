@@ -133,7 +133,7 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-6">売上観点</label>
                                     <div class="col-md-6">
-                                        <p class="form-control-static"> <?=$sales_rank['rank'];?>（<?=$sales_rank['denominator'];?>中 <?=$sales_rank['order'];?>）</p>
+                                        <p class="form-control-static"> <?=$sales_rank['rank'];?>（<?=$sales_rank['denominator'];?> 中 <?=$sales_rank['order'];?>）</p>
                                     </div>
                                 </div>
                             </div>
