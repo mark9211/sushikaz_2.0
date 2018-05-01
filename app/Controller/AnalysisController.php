@@ -31,18 +31,25 @@ class AnalysisController extends AppController{
 		$this->set('brands', $brands);
 		$breakdowns = $this->get_breakdown($location['Location']['id']);
 		$this->set('breakdowns', $breakdowns);
+		$fds = $this->get_fd($location['Location']['id']);
+		$this->set('fds', $fds);
 		# POST
 		if($this->request->is('post')){
 			# params
 			$menu_name = $this->request->data['menu_name'];
 			$breakdown_name = $this->request->data['breakdown_name'];
+			$fd = $this->request->data['fd'];
 			$start_date = $this->request->data['start_date'];
 			$end_date = $this->request->data['end_date'];
+			# メニューRank
+			$sales_rank = $this->get_menu_rank($menu_name, $breakdown_name, $fd, $location['Location']['id'], $start_date, $end_date);
+			$this->set('sales_rank', $sales_rank);
 			# メニュー情報
 			$menu_info = $this->get_menu_info($menu_name, $breakdown_name, $location['Location']['id'], $start_date, $end_date);
 			$menu_info = $menu_info[0][0];
 			$menu_info['menu_name'] = $menu_name;
 			$menu_info['breakdown_name'] = $breakdown_name;
+			$menu_info['fd'] = $fd;
 			$menu_info['start_date'] = $start_date;
 			$menu_info['end_date'] = $end_date;
 			$this->set('menu_info', $menu_info);
@@ -62,7 +69,7 @@ class AnalysisController extends AppController{
 	# init menus
 	private function get_menus($location_id){
 		$menus = $this->OrderSummary->find('all', array(
-			'fields' => ['OrderSummary.menu_name', 'sum(OrderSummary.price * OrderSummary.order_num) as sales'],
+			'fields' => ['OrderSummary.menu_name', 'OrderSummary.fd', 'sum(OrderSummary.price * OrderSummary.order_num) as sales'],
 			'conditions' => array(
 				'OrderSummary.location_id' => $location_id,
 				'NOT' => array( 'OrderSummary.menu_name' => '' )
@@ -73,7 +80,7 @@ class AnalysisController extends AppController{
 		return $menus;
 	}
 
-	# init breakdowns
+	# init brand
 	private function get_brand($location_id){
 		$result = $this->OrderSummary->find('all', array(
 			'fields' => ['OrderSummary.brand_name'],
@@ -99,6 +106,93 @@ class AnalysisController extends AppController{
 			'order' => array('OrderSummary.breakdown_name'),
 		));
 		return $result;
+	}
+
+	# init fd
+	private function get_fd($location_id){
+		$result = $this->OrderSummary->find('all', array(
+			'fields' => ['OrderSummary.fd'],
+			'conditions' => array(
+				'OrderSummary.location_id' => $location_id,
+				'NOT' => array( 'OrderSummary.fd' => '' )
+			),
+			'group' => array('OrderSummary.fd'),
+			'order' => array('OrderSummary.fd'),
+		));
+		return $result;
+	}
+
+	# menu sales ranking
+	private function get_menu_rank($menu_name, $breakdown_name, $fd, $location_id, $start_date, $end_date){
+		# 合計値
+		$total = $this->OrderSummary->find('all', array(
+			'fields' =>  [
+				"sum(CASE WHEN OrderSummary.price > 0 THEN OrderSummary.price * OrderSummary.order_num ELSE OrderSummary.price * OrderSummary.order_num * -1 END) as sales",
+				"sum(OrderSummary.order_num) as order_num",
+			],
+			'conditions' => array(
+				'OrderSummary.location_id' => $location_id,
+				'OrderSummary.working_day >=' => $start_date,
+				'OrderSummary.working_day <=' => $end_date,
+				'OrderSummary.breakdown_name' => $breakdown_name,
+				'OrderSummary.fd' => $fd,
+			),
+		));
+		$sales = $total[0][0]['sales'];
+		$order_num = $total[0][0]['order_num'];
+		# メニュー毎売上
+		$result = $this->OrderSummary->find('all', array(
+			'fields' =>  [
+				"OrderSummary.menu_name",
+				"sum(CASE WHEN OrderSummary.price > 0 THEN OrderSummary.price * OrderSummary.order_num ELSE OrderSummary.price * OrderSummary.order_num * -1 END) as sales",
+				"sum(OrderSummary.order_num) as order_num",
+			],
+			'conditions' => array(
+				'OrderSummary.location_id' => $location_id,
+				'OrderSummary.working_day >=' => $start_date,
+				'OrderSummary.working_day <=' => $end_date,
+				'OrderSummary.breakdown_name' => $breakdown_name,
+				'OrderSummary.fd' => $fd,
+			),
+			'group' => array('OrderSummary.menu_name'),
+			'order' => array('sales DESC'),
+		));
+		$arr = [];$total_rate=0;
+		if($result!=null){
+			foreach($result as $r){
+				$rate = $r[0]['sales']/$sales;
+				$total_rate += $rate;
+				$arr[] = array(
+					'menu_name'=>$r['OrderSummary']['menu_name'],
+					'sales'=>$r[0]['sales'],
+					'rate'=>$rate,
+					'total_rate'=>$total_rate,
+				);
+			}
+		}
+		$new_arr = [];
+		$key = array_search($menu_name, array_column($arr, 'menu_name'));
+		if($key!=false){
+			$new_arr['order'] = $key;
+			$new_arr['denominator'] = count($arr);
+			switch ($arr[$key]['total_rate']){
+				case $arr[$key]['total_rate']<0.7:
+					$new_arr['rank'] = 'A';
+					break;
+				case $arr[$key]['total_rate']>=0.7 && $arr[$key]['total_rate']<0.9:
+					$new_arr['rank'] = 'B';
+					break;
+				case $arr[$key]['total_rate']>=0.9 && $arr[$key]['total_rate']<1:
+					$new_arr['rank'] = 'C';
+					break;
+			}
+		}
+		else{
+			$new_arr['order'] = '圏外';
+			$new_arr['denominator'] = count($arr);
+			$new_arr['rank'] = 'Z';
+		}
+		return $new_arr;
 	}
 
 	# menu info

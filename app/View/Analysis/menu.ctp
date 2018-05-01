@@ -1,5 +1,7 @@
 <style>
+    h3{ font-size: 16px; }
     .grayOut{ color: #aaa; }
+    .table-scrollable{ overflow-y: auto;max-height: 250px; }
 </style>
 <div class="container">
     <div class="portlet light">
@@ -51,6 +53,18 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="control-label col-md-3">F/D</label>
+                        <div class="col-md-9">
+                            <select class="form-control input-small" name="fd">
+                                <?foreach($fds as $fd):?>
+                                    <option value="<?=$fd['OrderSummary']['fd'];?>" <?if(isset($menu_info)&&$menu_info['fd']==$fd['OrderSummary']['fd']){ echo 'selected'; }?>>
+                                        <?=$fd['OrderSummary']['fd'];?>
+                                    </option>
+                                <?endforeach;?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label col-md-3">分析開始日</label>
                         <div class="col-md-9">
                             <input class="form-control input-small" type="text" name="start_date" placeholder="20180401" value="<?if(isset($menu_info)){ echo $menu_info['start_date']; }?>">
@@ -86,7 +100,7 @@
             <form class="form-horizontal" role="form">
                 <div class="form-body">
                     <?if(isset($menu_info)&&isset($receipt_info)):?>
-                        <h3 class="form-section">Basic Info</h3>
+                        <h3 class="form-section">メニュー情報</h3>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -113,7 +127,34 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">Menu Info</h3>
+                        <h3 class="form-section">ABC（F/D別）</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">売上観点</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> <?=$sales_rank['rank'];?>（<?=$sales_rank['denominator'];?>中 <?=$sales_rank['order'];?>）</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">出数観点</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> - </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">粗利観点</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> - </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h3 class="form-section">注文情報</h3>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -166,7 +207,7 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">Receipt info</h3>
+                        <h3 class="form-section">レシート情報</h3>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -219,7 +260,7 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">一緒に頼まれやすいメニューランキング</h3>
+                        <h3 class="form-section">一緒に頼まれやすいメニュー</h3>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="portlet light bordered">
@@ -234,7 +275,7 @@
                                             <table class="table table-hover">
                                                 <thead>
                                                 <tr>
-                                                    <th> # </th>
+                                                    <th> 順位 </th>
                                                     <th> 商品名 </th>
                                                     <th> カテゴリ </th>
                                                     <th> 出現回数 </th>
@@ -270,7 +311,7 @@
                                             <table class="table table-hover">
                                                 <thead>
                                                 <tr>
-                                                    <th> # </th>
+                                                    <th> 順位 </th>
                                                     <th> 商品名 </th>
                                                     <th> カテゴリ </th>
                                                     <th> 出現回数 </th>
