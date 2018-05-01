@@ -174,7 +174,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="control-label col-md-6">注文レシート数</label>
+                                    <label class="control-label col-md-6">レシート数</label>
                                     <div class="col-md-6">
                                         <p class="form-control-static"> <?=number_format($receipt_info['menu_receipt_cnt']);?> </p>
                                     </div>
@@ -200,7 +200,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="control-label col-md-6">注文レシート数</label>
+                                    <label class="control-label col-md-6">レシート数</label>
                                     <div class="col-md-6">
                                         <p class="form-control-static"> <?=number_format($receipt_info['receipt_cnt']);?> </p>
                                     </div>
