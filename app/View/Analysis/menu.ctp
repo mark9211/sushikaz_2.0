@@ -225,7 +225,7 @@
                                 <div class="portlet light bordered">
                                     <div class="portlet-title">
                                         <div class="caption">
-                                            <span class="caption-subject font-green bold uppercase">フードメニューBEST10</span>
+                                            <span class="caption-subject font-green bold uppercase">フードメニューBEST5</span>
                                         </div>
                                         <div class="actions"></div>
                                     </div>
@@ -261,7 +261,7 @@
                                 <div class="portlet light bordered">
                                     <div class="portlet-title">
                                         <div class="caption">
-                                            <span class="caption-subject font-green bold uppercase">ドリンクメニューBEST10</span>
+                                            <span class="caption-subject font-green bold uppercase">ドリンクメニューBEST5</span>
                                         </div>
                                         <div class="actions"></div>
                                     </div>
