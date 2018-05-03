@@ -52,6 +52,7 @@
                             </select>
                         </div>
                     </div>
+                    <!--
                     <div class="form-group">
                         <label class="control-label col-md-3">F/D</label>
                         <div class="col-md-9">
@@ -64,6 +65,7 @@
                             </select>
                         </div>
                     </div>
+                    -->
                     <div class="form-group">
                         <label class="control-label col-md-3">分析開始日</label>
                         <div class="col-md-9">
@@ -154,7 +156,7 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">注文情報</h3>
+                        <h3 class="form-section">オーダー情報</h3>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">

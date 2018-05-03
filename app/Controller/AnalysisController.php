@@ -22,6 +22,8 @@ class AnalysisController extends AppController{
 
 	# メニュー単体分析
 	public function menu(){
+		# Title
+		$this->set('title_for_layout', 'メニュー単体分析');
 		# クッキー値
 		$location = $this->myData;
 		# initial値取得
@@ -37,8 +39,8 @@ class AnalysisController extends AppController{
 		if($this->request->is('post')){
 			# params
 			$menu_name = $this->request->data['menu_name'];
+			$fd = $this->get_fd_by_menu($menu_name);
 			$breakdown_name = $this->request->data['breakdown_name'];
-			$fd = $this->request->data['fd'];
 			$start_date = $this->request->data['start_date'];
 			$end_date = $this->request->data['end_date'];
 			# メニューRank
@@ -122,6 +124,15 @@ class AnalysisController extends AppController{
 		return $result;
 	}
 
+	# get fd by menu
+	private function get_fd_by_menu($menu_name){
+		$result = $this->OrderSummary->find('first', array(
+			'fields' => ['OrderSummary.fd'],
+			'conditions' => array('OrderSummary.menu_name' => $menu_name),
+		));
+		return $result['OrderSummary']['fd'];
+	}
+
 	# menu sales ranking
 	private function get_menu_rank($menu_name, $breakdown_name, $fd, $location_id, $start_date, $end_date){
 		# 合計値
@@ -139,7 +150,6 @@ class AnalysisController extends AppController{
 			),
 		));
 		$sales = $total[0][0]['sales'];
-		$order_num = $total[0][0]['order_num'];
 		# メニュー毎売上
 		$result = $this->OrderSummary->find('all', array(
 			'fields' =>  [
@@ -172,7 +182,12 @@ class AnalysisController extends AppController{
 		}
 		$new_arr = [];
 		$key = array_search($menu_name, array_column($arr, 'menu_name'));
-		if($key!=false){
+		if($key===false){
+			$new_arr['order'] = '圏外';
+			$new_arr['denominator'] = count($arr);
+			$new_arr['rank'] = 'Z';
+		}
+		else{
 			$new_arr['order'] = $key;
 			$new_arr['denominator'] = count($arr);
 			switch ($arr[$key]['total_rate']){
@@ -186,11 +201,6 @@ class AnalysisController extends AppController{
 					$new_arr['rank'] = 'C';
 					break;
 			}
-		}
-		else{
-			$new_arr['order'] = '圏外';
-			$new_arr['denominator'] = count($arr);
-			$new_arr['rank'] = 'Z';
 		}
 		return $new_arr;
 	}
