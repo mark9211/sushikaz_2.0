@@ -129,13 +129,13 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">ABC（F/D別）</h3>
+                        <h3 class="form-section">ABC情報（F/D別）</h3>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label class="control-label col-md-6">売上観点</label>
                                     <div class="col-md-6">
-                                        <p class="form-control-static"> <?=$sales_rank['rank'];?>（<?=$sales_rank['denominator'];?> 中 <?=$sales_rank['order'];?>）</p>
+                                        <p class="form-control-static"> <?=$sales_rank['rank'];?>（<?=$sales_rank['denominator'];?> 中 <?=$sales_rank['order'];?>位）</p>
                                     </div>
                                 </div>
                             </div>

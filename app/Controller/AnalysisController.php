@@ -188,7 +188,7 @@ class AnalysisController extends AppController{
 			$new_arr['rank'] = 'Z';
 		}
 		else{
-			$new_arr['order'] = $key;
+			$new_arr['order'] = $key+1;
 			$new_arr['denominator'] = count($arr);
 			switch ($arr[$key]['total_rate']){
 				case $arr[$key]['total_rate']<0.7:
