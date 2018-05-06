@@ -129,33 +129,6 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">ABC情報（F/D別）</h3>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="control-label col-md-6">売上観点</label>
-                                    <div class="col-md-6">
-                                        <p class="form-control-static"> <?=$sales_rank['rank'];?>（<?=$sales_rank['denominator'];?> 中 <?=$sales_rank['order'];?>位）</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="control-label col-md-6">出数観点</label>
-                                    <div class="col-md-6">
-                                        <p class="form-control-static"> - </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="control-label col-md-6">粗利観点</label>
-                                    <div class="col-md-6">
-                                        <p class="form-control-static"> - </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <h3 class="form-section">オーダー情報</h3>
                         <div class="row">
                             <div class="col-md-4">
@@ -209,6 +182,34 @@
                                 </div>
                             </div>
                         </div>
+                        <h3 class="form-section">ABC情報（F/D別）</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">売上観点</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> <?=$menu_sales_rank['rank'];?>（<?=$menu_sales_rank['denominator'];?> 中 <?=$menu_sales_rank['order'];?>位）</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">出数観点</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> <?=$menu_order_rank['rank'];?>（<?=$menu_order_rank['denominator'];?> 中 <?=$menu_order_rank['order'];?>位） </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="control-label col-md-6">粗利観点</label>
+                                    <div class="col-md-6">
+                                        <p class="form-control-static"> - </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--
                         <h3 class="form-section">レシート情報</h3>
                         <div class="row">
                             <div class="col-md-4">
@@ -262,13 +263,14 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="form-section">一緒に頼まれやすいメニュー</h3>
+                        -->
+                        <h3 class="form-section">ABCランキング（F/D別）</h3>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="portlet light bordered">
                                     <div class="portlet-title">
                                         <div class="caption">
-                                            <span class="caption-subject font-green bold uppercase">フードメニューBEST10</span>
+                                            <span class="caption-subject font-green bold uppercase">売上ABC</span>
                                         </div>
                                         <div class="actions"></div>
                                     </div>
@@ -279,20 +281,20 @@
                                                 <tr>
                                                     <th> 順位 </th>
                                                     <th> 商品名 </th>
-                                                    <th> カテゴリ </th>
-                                                    <th> 出現回数 </th>
+                                                    <th> 構成比 </th>
+                                                    <th> 累計構成比 </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                <?if($food_menus!=null):?>
-                                                <?foreach($food_menus as $key => $food_menu):?>
+                                                <?if(isset($sales_rank)):?>
+                                                    <?foreach($sales_rank as $key => $sr):?>
                                                     <tr>
                                                         <td> <?=$key+1;?> </td>
-                                                        <td> <?=$food_menu['OrderSummary']['menu_name'];?> </td>
-                                                        <td> <?=$food_menu['OrderSummary']['category_name'];?> </td>
-                                                        <td> <?=$food_menu[0]['cnt'];?> </td>
+                                                        <td> <?=$sr['menu_name'];?> </td>
+                                                        <td> <?=floor($sr['rate']*1000)/10;?>% </td>
+                                                        <td> <?=floor($sr['total_rate']*1000)/10;?>% </td>
                                                     </tr>
-                                                <?endforeach;?>
+                                                    <?endforeach;?>
                                                 <?endif;?>
                                                 </tbody>
                                             </table>
@@ -304,7 +306,7 @@
                                 <div class="portlet light bordered">
                                     <div class="portlet-title">
                                         <div class="caption">
-                                            <span class="caption-subject font-green bold uppercase">ドリンクメニューBEST10</span>
+                                            <span class="caption-subject font-green bold uppercase">出数ABC</span>
                                         </div>
                                         <div class="actions"></div>
                                     </div>
@@ -315,19 +317,19 @@
                                                 <tr>
                                                     <th> 順位 </th>
                                                     <th> 商品名 </th>
-                                                    <th> カテゴリ </th>
-                                                    <th> 出現回数 </th>
+                                                    <th> 構成比 </th>
+                                                    <th> 累計構成比 </th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                <?if($drink_menus!=null):?>
-                                                    <?foreach($drink_menus as $key => $drink_menu):?>
-                                                        <tr>
-                                                            <td> <?=$key+1;?> </td>
-                                                            <td> <?=$drink_menu['OrderSummary']['menu_name'];?> </td>
-                                                            <td> <?=$drink_menu['OrderSummary']['category_name'];?> </td>
-                                                            <td> <?=$drink_menu[0]['cnt'];?> </td>
-                                                        </tr>
+                                                <?if(isset($order_rank)):?>
+                                                    <?foreach($order_rank as $key => $or):?>
+                                                    <tr>
+                                                        <td> <?=$key+1;?> </td>
+                                                        <td> <?=$or['menu_name'];?> </td>
+                                                        <td> <?=floor($or['rate']*1000)/10;?>% </td>
+                                                        <td> <?=floor($or['total_rate']*1000)/10;?>% </td>
+                                                    </tr>
                                                     <?endforeach;?>
                                                 <?endif;?>
                                                 </tbody>

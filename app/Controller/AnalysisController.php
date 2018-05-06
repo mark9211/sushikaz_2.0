@@ -43,9 +43,16 @@ class AnalysisController extends AppController{
 			$breakdown_name = $this->request->data['breakdown_name'];
 			$start_date = $this->request->data['start_date'];
 			$end_date = $this->request->data['end_date'];
-			# メニューRank
-			$sales_rank = $this->get_menu_rank($menu_name, $breakdown_name, $fd, $location['Location']['id'], $start_date, $end_date);
+			# メニューSalesRank
+			$sales_rank = $this->get_menu_rank($breakdown_name, $fd, $location['Location']['id'], $start_date, $end_date);
+			$menu_sales_rank = $this->get_rank($sales_rank, $menu_name);
 			$this->set('sales_rank', $sales_rank);
+			$this->set('menu_sales_rank', $menu_sales_rank);
+			# メニューOrderRank
+			$order_rank = $this->get_menu_order_rank($menu_name, $breakdown_name, $fd, $location['Location']['id'], $start_date, $end_date);
+			$menu_order_rank = $this->get_rank($order_rank, $menu_name);
+			$this->set('order_rank', $order_rank);
+			$this->set('menu_order_rank', $menu_order_rank);
 			# メニュー情報
 			$menu_info = $this->get_menu_info($menu_name, $breakdown_name, $location['Location']['id'], $start_date, $end_date);
 			$menu_info = $menu_info[0][0];
@@ -60,11 +67,6 @@ class AnalysisController extends AppController{
 			$receipt_info = $this->get_receipt_info_by_receipt_ids($receipt_ids, $breakdown_name, $location['Location']['id'], $start_date, $end_date);
 			$receipt_info = $receipt_info[0][0];
 			$this->set('receipt_info', $receipt_info);
-			# メニュー相性
-			$food_menus = $this->get_compatible_menus('フード', $menu_name, $receipt_ids, $location['Location']['id'], $start_date, $end_date);
-			$this->set('food_menus', $food_menus);
-			$drink_menus = $this->get_compatible_menus('ドリンク', $menu_name, $receipt_ids, $location['Location']['id'], $start_date, $end_date);
-			$this->set('drink_menus', $drink_menus);
 		}
 	}
 
@@ -134,7 +136,7 @@ class AnalysisController extends AppController{
 	}
 
 	# menu sales ranking
-	private function get_menu_rank($menu_name, $breakdown_name, $fd, $location_id, $start_date, $end_date){
+	private function get_menu_rank($breakdown_name, $fd, $location_id, $start_date, $end_date){
 		# 合計値
 		$total = $this->OrderSummary->find('all', array(
 			'fields' =>  [
@@ -180,6 +182,56 @@ class AnalysisController extends AppController{
 				);
 			}
 		}
+		return $arr;
+	}
+
+	# menu order ranking
+	private function get_menu_order_rank($menu_name, $breakdown_name, $fd, $location_id, $start_date, $end_date){
+		# 合計値
+		$total = $this->OrderSummary->find('all', array(
+			'fields' =>  ["sum(OrderSummary.order_num) as order_num",],
+			'conditions' => array(
+				'OrderSummary.location_id' => $location_id,
+				'OrderSummary.working_day >=' => $start_date,
+				'OrderSummary.working_day <=' => $end_date,
+				'OrderSummary.breakdown_name' => $breakdown_name,
+				'OrderSummary.fd' => $fd,
+			),
+		));
+		$order_num = $total[0][0]['order_num'];
+		# メニュー毎売上
+		$result = $this->OrderSummary->find('all', array(
+			'fields' =>  [
+				"OrderSummary.menu_name",
+				"sum(OrderSummary.order_num) as order_num",
+			],
+			'conditions' => array(
+				'OrderSummary.location_id' => $location_id,
+				'OrderSummary.working_day >=' => $start_date,
+				'OrderSummary.working_day <=' => $end_date,
+				'OrderSummary.breakdown_name' => $breakdown_name,
+				'OrderSummary.fd' => $fd,
+			),
+			'group' => array('OrderSummary.menu_name'),
+			'order' => array('order_num DESC'),
+		));
+		$arr = [];$total_rate=0;
+		if($result!=null){
+			foreach($result as $r){
+				$rate = $r[0]['order_num']/$order_num;
+				$total_rate += $rate;
+				$arr[] = array(
+					'menu_name'=>$r['OrderSummary']['menu_name'],
+					'order_num'=>$r[0]['order_num'],
+					'rate'=>$rate,
+					'total_rate'=>$total_rate,
+				);
+			}
+		}
+		return $arr;
+	}
+
+	private function get_rank($arr, $menu_name){
 		$new_arr = [];
 		$key = array_search($menu_name, array_column($arr, 'menu_name'));
 		if($key===false){
