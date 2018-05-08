@@ -70,6 +70,45 @@ class AnalysisController extends AppController{
 		}
 	}
 
+	public function menu_trend(){
+		# Title
+		$this->set('title_for_layout', 'メニュートレンド分析');
+		# クッキー値
+		$location = $this->myData;
+		# initial値取得
+		$breakdowns = $this->get_breakdown($location['Location']['id']);
+		$this->set('breakdowns', $breakdowns);
+		$fds = $this->get_fd($location['Location']['id']);
+		$this->set('fds', $fds);
+		# POST
+		if($this->request->is('post')){
+			# params
+			$breakdown_name = $this->request->data['breakdown_name'];
+			$fd = $this->request->data['fd'];
+			$period_type =  $this->request->data['period_type'];
+			switch($period_type){
+				case $period_type==1:
+					$end_date = date('Y-m-d', mktime(0, 0, 0, date('m'), 0, date('Y')));
+					$start_date = date("Y-m-d", strtotime("-30 day", strtotime($end_date)));
+					$compare_end_date = $start_date;
+					$compare_start_date = date("Y-m-d", strtotime("-30 day", strtotime($compare_end_date)));
+					break;
+				default:
+					echo 'Period Type Error';exit;
+					break;
+			}
+			$menu_trend = $this->get_menu_trend($location['Location']['id'], $breakdown_name, $fd, $start_date, $end_date, $compare_start_date, $compare_end_date);
+			$this->set('menu_trend', $menu_trend);
+			$this->set('breakdown_name', $breakdown_name);
+			$this->set('fd_name', $fd);
+			$this->set('period_type', $period_type);
+			$this->set('start_date', $start_date);
+			$this->set('end_date', $end_date);
+			$this->set('compare_start_date', $compare_start_date);
+			$this->set('compare_end_date', $compare_end_date);
+		}
+	}
+
 	# init menus
 	private function get_menus($location_id){
 		$menus = $this->OrderSummary->find('all', array(
@@ -348,6 +387,52 @@ class AnalysisController extends AppController{
 		));
 		#debug($result);
 		return $result;
+	}
+
+	private function get_menu_trend($location_id, $breakdown_name, $fd, $start_date, $end_date, $compare_start_date, $compare_end_date){
+		$result = $this->OrderSummary->find('all', array(
+			'fields' =>  [
+				"max(OrderSummary.menu_name) as menu_name",
+				"sum(CASE WHEN OrderSummary.price > 0 THEN OrderSummary.price * OrderSummary.order_num ELSE OrderSummary.price * OrderSummary.order_num * -1 END) as sales",
+				"sum(OrderSummary.order_num) as order_num",
+			],
+			'conditions' => array(
+				'OrderSummary.location_id' => $location_id,
+				'OrderSummary.working_day >=' => $start_date,
+				'OrderSummary.working_day <=' => $end_date,
+				'OrderSummary.breakdown_name' => $breakdown_name,
+				'OrderSummary.fd' => $fd,
+			),
+			'group' => array('OrderSummary.menu_name'),
+			'order' => array('sales DESC'),
+		));
+		$arr = [];
+		if($result!=null){
+			foreach($result as $r){
+				$menu_name = $r[0]['menu_name'];
+				$compare = $this->OrderSummary->find('first', array(
+					'fields' =>  [
+						"sum(CASE WHEN OrderSummary.price > 0 THEN OrderSummary.price * OrderSummary.order_num ELSE OrderSummary.price * OrderSummary.order_num * -1 END) as sales",
+						"sum(OrderSummary.order_num) as order_num",
+					],
+					'conditions' => array(
+						'OrderSummary.location_id' => $location_id,
+						'OrderSummary.working_day >=' => $compare_start_date,
+						'OrderSummary.working_day <=' => $compare_end_date,
+						'OrderSummary.breakdown_name' => $breakdown_name,
+						'OrderSummary.fd' => $fd,
+						'OrderSummary.menu_name' => $menu_name,
+					),
+					'group' => array('OrderSummary.menu_name'),
+				));
+				if($compare!=null){
+					$arr[] = ['menu_name'=>$menu_name,'diff'=>$r[0]['sales']-$compare[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>$compare[0]['sales'], 'compare_order_num'=>$compare[0]['order_num']];
+				}else{
+					$arr[] = ['menu_name'=>$menu_name,'diff'=>$r[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>0, 'compare_order_num'=>0];
+				}
+			}
+		}
+		return $arr;
 	}
 
 }

@@ -14,6 +14,9 @@
                 <li class="list-group-item">
                     <?= $this->Html->link('メニュー単体分析', array('controller'=>'analysis', 'action'=>'menu'));?>
                 </li>
+                <li class="list-group-item">
+                    <?= $this->Html->link('メニュートレンド分析', array('controller'=>'analysis', 'action'=>'menu_trend'));?>
+                </li>
             </ul>
         </div>
     </div>
