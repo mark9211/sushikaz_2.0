@@ -393,6 +393,7 @@ class AnalysisController extends AppController{
 		$result = $this->OrderSummary->find('all', array(
 			'fields' =>  [
 				"max(OrderSummary.menu_name) as menu_name",
+				"max(OrderSummary.category_name) as category_name",
 				"sum(CASE WHEN OrderSummary.price > 0 THEN OrderSummary.price * OrderSummary.order_num ELSE OrderSummary.price * OrderSummary.order_num * -1 END) as sales",
 				"sum(OrderSummary.order_num) as order_num",
 			],
@@ -404,7 +405,7 @@ class AnalysisController extends AppController{
 				'OrderSummary.fd' => $fd,
 			),
 			'group' => array('OrderSummary.menu_name'),
-			'order' => array('sales DESC'),
+			'order' => array('category_name,sales DESC'),
 		));
 		$arr = [];
 		if($result!=null){
@@ -426,9 +427,9 @@ class AnalysisController extends AppController{
 					'group' => array('OrderSummary.menu_name'),
 				));
 				if($compare!=null){
-					$arr[] = ['menu_name'=>$menu_name,'diff'=>$r[0]['sales']-$compare[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>$compare[0]['sales'], 'compare_order_num'=>$compare[0]['order_num']];
+					$arr[] = ['category_name'=>$r[0]['category_name'],'menu_name'=>$menu_name,'diff'=>$r[0]['sales']-$compare[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>$compare[0]['sales'], 'compare_order_num'=>$compare[0]['order_num']];
 				}else{
-					$arr[] = ['menu_name'=>$menu_name,'diff'=>$r[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>0, 'compare_order_num'=>0];
+					$arr[] = ['category_name'=>$r[0]['category_name'],'menu_name'=>$menu_name,'diff'=>$r[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>0, 'compare_order_num'=>0];
 				}
 			}
 		}

@@ -82,6 +82,7 @@
                                         <table class="table table-hover">
                                             <thead>
                                             <tr>
+                                                <th>カテゴリ</th>
                                                 <th>メニュー</th>
                                                 <th>売上差分</th>
                                                 <th>売上（比較元）</th>
@@ -94,6 +95,7 @@
                                             <?if(isset($menu_trend)):?>
                                                 <?foreach ($menu_trend as $mt): ?>
                                                     <tr class="<? if(abs($mt['diff'])>=10000){ if($mt['diff']<0){echo 'danger';}else{echo 'success';} }?>">
+                                                        <td><?= $mt['category_name']; ?></td>
                                                         <td><?= $mt['menu_name']; ?></td>
                                                         <td>¥<?= number_format($mt['diff']); ?></td>
                                                         <td>¥<?= number_format($mt['sales']); ?></td>
