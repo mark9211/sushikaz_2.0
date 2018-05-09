@@ -1,5 +1,6 @@
 <style>
     h3{ font-size: 16px; }
+    .hosoku{ font-size: 14px; }
     .grayOut{ color: #aaa; }
     .table-scrollable{ overflow-y: auto; }
 </style>
@@ -62,12 +63,38 @@
         <div class="portlet-title">
             <div class="caption">
                 <span class="caption-subject font-green sbold uppercase">分析結果</span>
+                <span class="hosoku">＊<?=$start_date;?>-<?=$end_date;?> vs <?=$compare_start_date;?>-<?=$compare_end_date;?></span>
             </div>
         </div>
         <div class="portlet-body form">
             <form class="form-horizontal" role="form">
                 <div class="form-body">
-                    <h3 class="form-section"><?=$start_date;?>-<?=$end_date;?> vs <?=$compare_start_date;?>-<?=$compare_end_date;?></h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label col-md-6">合計差分</label>
+                                <div class="col-md-6">
+                                    <p class="form-control-static"> <?=number_format($total_sales-$compare_total_sales);?> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label col-md-6">合計（比較元）</label>
+                                <div class="col-md-6">
+                                    <p class="form-control-static"> ¥<?=number_format($total_sales);?> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label col-md-6">合計（比較先）</label>
+                                <div class="col-md-6">
+                                    <p class="form-control-static"> ¥<?=number_format($compare_total_sales);?> </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="table-scrollable">
@@ -89,7 +116,7 @@
                                             <tr class="<? if(abs($mt['diff'])>=10000){ if($mt['diff']<0){echo 'danger';}else{echo 'success';} }?>">
                                                 <td><?= $mt['category_name']; ?></td>
                                                 <td><?= $mt['menu_name']; ?></td>
-                                                <td>¥<?= number_format($mt['diff']); ?></td>
+                                                <td><?= number_format($mt['diff']); ?></td>
                                                 <td>¥<?= number_format($mt['sales']); ?></td>
                                                 <td>¥<?= number_format($mt['compare_sales']); ?></td>
                                                 <td><?= number_format($mt['order_num']); ?></td>

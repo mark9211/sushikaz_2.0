@@ -88,17 +88,19 @@ class AnalysisController extends AppController{
 			$period_type =  $this->request->data['period_type'];
 			switch($period_type){
 				case $period_type==1:
-					$end_date = date('Y-m-d', mktime(0, 0, 0, date('m'), 0, date('Y')));
-					$start_date = date("Y-m-d", strtotime("-30 day", strtotime($end_date)));
-					$compare_end_date = $start_date;
-					$compare_start_date = date("Y-m-d", strtotime("-30 day", strtotime($compare_end_date)));
+					$end_date = date("Y-m-d",strtotime("last day of - 1 month"));
+					$start_date = date("Y-m-d",strtotime("first day of - 1 month"));
+					$compare_end_date = date("Y-m-d",strtotime("last day of - 2 month"));
+					$compare_start_date = date("Y-m-d",strtotime("first day of - 2 month"));
 					break;
 				default:
 					echo 'Period Type Error';exit;
 					break;
 			}
 			$menu_trend = $this->get_menu_trend($location['Location']['id'], $breakdown_name, $fd, $start_date, $end_date, $compare_start_date, $compare_end_date);
-			$this->set('menu_trend', $menu_trend);
+			$this->set('total_sales', $menu_trend[0]['total_sales']);
+			$this->set('compare_total_sales', $menu_trend[0]['compare_total_sales']);
+			$this->set('menu_trend', $menu_trend[1]);
 			$this->set('breakdown_name', $breakdown_name);
 			$this->set('fd_name', $fd);
 			$this->set('period_type', $period_type);
@@ -407,9 +409,10 @@ class AnalysisController extends AppController{
 			'group' => array('OrderSummary.menu_name'),
 			'order' => array('category_name,sales DESC'),
 		));
-		$arr = [];
+		$arr = [];$total_sales=0;$compare_total_sales=0;
 		if($result!=null){
 			foreach($result as $r){
+				$total_sales+=$r[0]['sales'];
 				$menu_name = $r[0]['menu_name'];
 				$compare = $this->OrderSummary->find('first', array(
 					'fields' =>  [
@@ -428,12 +431,13 @@ class AnalysisController extends AppController{
 				));
 				if($compare!=null){
 					$arr[] = ['category_name'=>$r[0]['category_name'],'menu_name'=>$menu_name,'diff'=>$r[0]['sales']-$compare[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>$compare[0]['sales'], 'compare_order_num'=>$compare[0]['order_num']];
+					$compare_total_sales+=$compare[0]['sales'];
 				}else{
 					$arr[] = ['category_name'=>$r[0]['category_name'],'menu_name'=>$menu_name,'diff'=>$r[0]['sales'],'sales'=>$r[0]['sales'], 'order_num'=>$r[0]['order_num'], 'compare_sales'=>0, 'compare_order_num'=>0];
 				}
 			}
 		}
-		return $arr;
+		return [0=>['total_sales'=>$total_sales, 'compare_total_sales'=>$compare_total_sales],1=>$arr];
 	}
 
 }
