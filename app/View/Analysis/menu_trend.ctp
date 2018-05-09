@@ -67,48 +67,38 @@
         <div class="portlet-body form">
             <form class="form-horizontal" role="form">
                 <div class="form-body">
+                    <h3 class="form-section"><?=$start_date;?>-<?=$end_date;?> vs <?=$compare_start_date;?>-<?=$compare_end_date;?></h3>
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="portlet light bordered">
-                                <div class="portlet-title">
-                                    <div class="caption">
-                                        <span class="caption-subject font-green bold uppercase"><?=$start_date;?> - <?=$end_date;?></span> vs
-                                        <span class="caption-subject font-green bold uppercase"><?=$compare_start_date;?> - <?=$compare_end_date;?></span>
-                                    </div>
-                                    <div class="actions"></div>
-                                </div>
-                                <div class="portlet-body">
-                                    <div class="table-scrollable">
-                                        <table class="table table-hover">
-                                            <thead>
-                                            <tr>
-                                                <th>カテゴリ</th>
-                                                <th>メニュー</th>
-                                                <th>売上差分</th>
-                                                <th>売上（比較元）</th>
-                                                <th>売上（比較先）</th>
-                                                <th>出数（比較元）</th>
-                                                <th>出数（比較先）</th>
+                            <div class="table-scrollable">
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>カテゴリ</th>
+                                        <th>メニュー</th>
+                                        <th>売上差分</th>
+                                        <th>売上（比較元）</th>
+                                        <th>売上（比較先）</th>
+                                        <th>出数（比較元）</th>
+                                        <th>出数（比較先）</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?if(isset($menu_trend)):?>
+                                        <?foreach ($menu_trend as $mt): ?>
+                                            <tr class="<? if(abs($mt['diff'])>=10000){ if($mt['diff']<0){echo 'danger';}else{echo 'success';} }?>">
+                                                <td><?= $mt['category_name']; ?></td>
+                                                <td><?= $mt['menu_name']; ?></td>
+                                                <td>¥<?= number_format($mt['diff']); ?></td>
+                                                <td>¥<?= number_format($mt['sales']); ?></td>
+                                                <td>¥<?= number_format($mt['compare_sales']); ?></td>
+                                                <td><?= number_format($mt['order_num']); ?></td>
+                                                <td><?= number_format($mt['compare_order_num']); ?></td>
                                             </tr>
-                                            </thead>
-                                            <tbody>
-                                            <?if(isset($menu_trend)):?>
-                                                <?foreach ($menu_trend as $mt): ?>
-                                                    <tr class="<? if(abs($mt['diff'])>=10000){ if($mt['diff']<0){echo 'danger';}else{echo 'success';} }?>">
-                                                        <td><?= $mt['category_name']; ?></td>
-                                                        <td><?= $mt['menu_name']; ?></td>
-                                                        <td>¥<?= number_format($mt['diff']); ?></td>
-                                                        <td>¥<?= number_format($mt['sales']); ?></td>
-                                                        <td>¥<?= number_format($mt['compare_sales']); ?></td>
-                                                        <td><?= number_format($mt['order_num']); ?></td>
-                                                        <td><?= number_format($mt['compare_order_num']); ?></td>
-                                                    </tr>
-                                                <?endforeach; ?>
-                                            <?endif;?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                                        <?endforeach; ?>
+                                    <?endif;?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
