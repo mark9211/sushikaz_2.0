@@ -117,7 +117,7 @@
                                         <?foreach ($menu_trend as $key => $mt): ?>
                                             <?$rank=$key+1;$rank_diff=$mt['compare_rank']-$rank;?>
                                             <?if($rank_diff>0){ $arrow='fa fa-arrow-up'; }elseif($rank_diff<0){ $arrow='fa fa-arrow-down'; }else{ $arrow='fa fa-arrow-right'; } ?>
-                                            <tr class="<?if(abs($rank_diff)>=5 && abs($mt['order_num']-$mt['compare_order_num'])>=10){ if($rank_diff>0){ echo 'success';}else{ echo 'danger';} } ?>">
+                                            <tr class="<?if(abs($rank_diff)>=5 && abs($mt['order_num']-$mt['compare_order_num'])>=5){ if($rank_diff>0){ echo 'success';}else{ echo 'danger';} } ?>">
                                                 <td><?= $key+1; ?></td>
                                                 <td><i class="<?=$arrow;?>" aria-hidden="true"></i> <?= $rank_diff; ?></td>
                                                 <td><?= $mt['menu_name']; ?></td>
