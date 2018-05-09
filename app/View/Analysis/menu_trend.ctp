@@ -42,7 +42,9 @@
                         <label class="control-label col-md-3">分析期間</label>
                         <div class="col-md-9">
                             <select class="form-control input-medium" name="period_type">
-                                <option value="1">前月 vs 前々月</option>
+                                <option value="1">先週 vs 先々週</option>
+                                <option value="2">先々週 vs 三週間前</option>
+                                <option value="3">前月 vs 前々月</option>
                             </select>
                         </div>
                     </div>
@@ -72,17 +74,9 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label class="control-label col-md-6">合計差分</label>
-                                <div class="col-md-6">
-                                    <p class="form-control-static"> <?=number_format($total_sales-$compare_total_sales);?> </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
                                 <label class="control-label col-md-6">合計（比較元）</label>
                                 <div class="col-md-6">
-                                    <p class="form-control-static"> ¥<?=number_format($total_sales);?> </p>
+                                    <p class="form-control-static">¥ <?=number_format($total_num);?> </p>
                                 </div>
                             </div>
                         </div>
@@ -90,7 +84,15 @@
                             <div class="form-group">
                                 <label class="control-label col-md-6">合計（比較先）</label>
                                 <div class="col-md-6">
-                                    <p class="form-control-static"> ¥<?=number_format($compare_total_sales);?> </p>
+                                    <p class="form-control-static">¥ <?=number_format($compare_total_num);?> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label col-md-6">合計差分</label>
+                                <div class="col-md-6">
+                                    <p class="form-control-static"> <?=number_format($total_num-$compare_total_num);?> </p>
                                 </div>
                             </div>
                         </div>
@@ -101,26 +103,28 @@
                                 <table class="table table-hover">
                                     <thead>
                                     <tr>
-                                        <th>カテゴリ</th>
+                                        <th>順位</th>
+                                        <th>前回から</th>
                                         <th>メニュー</th>
-                                        <th>売上差分</th>
-                                        <th>売上（比較元）</th>
-                                        <th>売上（比較先）</th>
+                                        <th>カテゴリ</th>
                                         <th>出数（比較元）</th>
                                         <th>出数（比較先）</th>
+                                        <th>出数差分</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <?if(isset($menu_trend)):?>
-                                        <?foreach ($menu_trend as $mt): ?>
-                                            <tr class="<? if(abs($mt['diff'])>=10000){ if($mt['diff']<0){echo 'danger';}else{echo 'success';} }?>">
-                                                <td><?= $mt['category_name']; ?></td>
+                                        <?foreach ($menu_trend as $key => $mt): ?>
+                                            <?$rank=$key+1;$rank_diff=$mt['compare_rank']-$rank;?>
+                                            <?if($rank_diff>0){ $arrow='fa fa-arrow-up'; }elseif($rank_diff<0){ $arrow='fa fa-arrow-down'; }else{ $arrow='fa fa-arrow-right'; } ?>
+                                            <tr class="<?if(abs($rank_diff)>5){ if($rank_diff>0){ echo 'success';}else{ echo 'danger';} } ?>">
+                                                <td><?= $key+1; ?></td>
+                                                <td><i class="<?=$arrow;?>" aria-hidden="true"></i> <?= $rank_diff; ?></td>
                                                 <td><?= $mt['menu_name']; ?></td>
-                                                <td><?= number_format($mt['diff']); ?></td>
-                                                <td>¥<?= number_format($mt['sales']); ?></td>
-                                                <td>¥<?= number_format($mt['compare_sales']); ?></td>
+                                                <td><?= $mt['category_name']; ?></td>
                                                 <td><?= number_format($mt['order_num']); ?></td>
                                                 <td><?= number_format($mt['compare_order_num']); ?></td>
+                                                <td><?= number_format($mt['order_num']-$mt['compare_order_num']); ?></td>
                                             </tr>
                                         <?endforeach; ?>
                                     <?endif;?>
