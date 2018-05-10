@@ -136,7 +136,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
-                                                    <td class="<?if($ct['sales_diff']>0){ echo 'success'; }elseif($ct['sales_diff']<0){ echo 'danger'; }?>"><?=$ct['sales_diff'];?></td>
+                                                    <td class="<?if($ct['sales_diff']>0){ echo 'success'; }elseif($ct['sales_diff']<0){ echo 'danger'; }?>"><?=number_format($ct['sales_diff']);?></td>
                                                 <?endif;?>
                                             <?endforeach;?>
                                         <?endif;?>
