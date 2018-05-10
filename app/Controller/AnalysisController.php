@@ -335,7 +335,6 @@ class AnalysisController extends AppController{
 				'OrderSummary.working_day >=' => $start_date,
 				'OrderSummary.working_day <=' => $end_date,
 				'OrderSummary.breakdown_name' => $breakdown_name,
-				'NOT' => array('OrderSummary.category_name' => ''),
 			),
 		));
 		#debug($result);
@@ -426,6 +425,7 @@ class AnalysisController extends AppController{
 				'OrderSummary.location_id' => $location_id,
 				'OrderSummary.breakdown_name' => $breakdown_name,
 				'OrderSummary.fd' => $fd,
+				'NOT' => array('OrderSummary.category_name' => ''),
 			),
 			'group' => array('OrderSummary.menu_name'),
 			'order' => array('compare_order_num DESC'),
