@@ -181,7 +181,6 @@ var TableAdvanced = function () {
                 "search": "Search:",
                 "zeroRecords": "No matching records found"
             },
-
             "columnDefs": [{
                 "orderable": false,
                 "targets": [0]
