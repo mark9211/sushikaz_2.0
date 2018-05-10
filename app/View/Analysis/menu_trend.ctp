@@ -58,9 +58,9 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                         <label class="control-label col-md-3">分析期間</label>
                         <div class="col-md-9">
                             <select class="form-control input-medium" name="period_type">
-                                <option value="1">先週 vs 先々週</option>
-                                <option value="2">先々週 vs 三週間前</option>
-                                <option value="3">前月 vs 前々月</option>
+                                <option value="1" <?if(isset($period_type)&&$period_type==1){ echo 'selected'; }?>>先週 vs 先々週</option>
+                                <option value="2" <?if(isset($period_type)&&$period_type==2){ echo 'selected'; }?>>先々週 vs 3週前</option>
+                                <option value="3" <?if(isset($period_type)&&$period_type==3){ echo 'selected'; }?>>前月 vs 前々月</option>
                             </select>
                         </div>
                     </div>
@@ -81,7 +81,9 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
         <div class="portlet-title">
             <div class="caption">
                 <span class="caption-subject font-green sbold uppercase">分析結果</span>
+                <?if(isset($start_date)&&isset($end_date)&&isset($compare_start_date)&&isset($compare_end_date)):?>
                 <span class="hosoku">＊<?=$start_date;?>-<?=$end_date;?> vs <?=$compare_start_date;?>-<?=$compare_end_date;?></span>
+                <?endif;?>
             </div>
         </div>
         <div class="portlet-body form">
@@ -107,8 +109,8 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                     </thead>
                                     <tbody>
                                     <tr>
-                                        <td><?=$period_script[0];?></td>
-                                        <th>¥<?=number_format($total['sales']);?></th>
+                                        <td><?if(isset($period_script)){ echo $period_script[0]; }?></td>
+                                        <th><?if(isset($total)){ echo '¥'.number_format($total['sales']); }?></th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
@@ -118,8 +120,8 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <?endif;?>
                                     </tr>
                                     <tr>
-                                        <td><?=$period_script[1];?></td>
-                                        <th>¥<?=number_format($total['compare_sales']);?></th>
+                                        <td><?if(isset($period_script)){ echo $period_script[1]; }?></td>
+                                        <th><?if(isset($total)){ echo '¥'.number_format($total['compare_sales']); }?></th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
@@ -129,8 +131,8 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <?endif;?>
                                     </tr>
                                     <tr>
-                                        <td>差分</td>
-                                        <th class="<?if($total['sales_diff']>0){ echo 'success'; }elseif($total['sales_diff']<0){ echo 'danger'; }?>"><?=$total['sales_diff'];?></th>
+                                        <td><?if(isset($period_script)){ echo '差分'; }?></td>
+                                        <th class="<? if(isset($total)){ if($total['sales_diff']>0){ echo 'success'; }elseif($total['sales_diff']<0){ echo 'danger'; } } ?>"><?if(isset($total)){ echo number_format($total['sales_diff']); }?></th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
