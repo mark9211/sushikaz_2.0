@@ -417,7 +417,7 @@ class AnalysisController extends AppController{
 			'fields' =>  [
 				"max(OrderSummary.menu_name) as menu_name",
 				"max(OrderSummary.category_name) as category_name",
-				"avg(OrderSummary.price) as price",
+				"avg(CASE WHEN OrderSummary.price > 0 THEN OrderSummary.price END) as price",
 				"sum(CASE WHEN OrderSummary.working_day >= '$start_date' AND OrderSummary.working_day <= '$end_date' THEN OrderSummary.order_num END) as order_num",
 				"sum(CASE WHEN OrderSummary.working_day >= '$compare_start_date' AND OrderSummary.working_day <= '$compare_end_date' THEN OrderSummary.order_num END) as compare_order_num",
 			],
@@ -468,14 +468,17 @@ class AnalysisController extends AppController{
 			foreach($result as $key => $r){
 				$r[0]['sales_diff']=$r[0]['sales']-$r[0]['compare_sales'];
 				$r[0]['order_diff']=$r[0]['order_num']-$r[0]['compare_order_num'];
+				$r[0]['per_num']=floor($r[0]['sales']/$r[0]['order_num']);
+				$r[0]['compare_per_num']=floor($r[0]['compare_sales']/$r[0]['compare_order_num']);
+				$r[0]['per_num_diff']=$r[0]['per_num']-$r[0]['compare_per_num'];
 				$new_arr[] = $r[0];
-				$ts+=$r[0]['sales'];
+				$ts += $r[0]['sales'];
 				$cts+=$r[0]['compare_sales'];
 				$to+=$r[0]['order_num'];
 				$cto+=$r[0]['compare_order_num'];
 			}
 		}
-		return [0=>['sales'=>$ts,'compare_sales'=>$cts,'sales_diff'=>$ts-$cts, 'order_num'=>$to,'compare_order_num'=>$cto,'order_diff'=>$to-$cto],1=>$new_arr];
+		return [0=>['sales'=>$ts,'compare_sales'=>$cts,'sales_diff'=>$ts-$cts, 'order_num'=>$to,'compare_order_num'=>$cto,'order_diff'=>$to-$cto, 'per_num'=>floor($ts/$cto), 'compare_per_num'=>floor($to/$to), 'per_num_diff'=>floor($ts/$cto)-floor($to/$to)],1=>$new_arr];
 	}
 
 }

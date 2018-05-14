@@ -17,8 +17,11 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
 <style>
     h3{ font-size: 16px; }
     .hosoku{ font-size: 14px; }
-    .grayOut{ color: #aaa; }
+    .grayZone{ background: #eee; }
+    .grayCell{ border-right: 1px solid #000 !important; }
+    .borderBottom{ border-bottom: 2px solid #000 !important; }
     .table-scrollable{ overflow-y: auto; }
+    th,td{ text-align: center;}
 </style>
 <div class="container">
     <div class="portlet light">
@@ -96,8 +99,8 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                 <table class="table table-bordered table-hover">
                                     <thead>
                                     <tr>
-                                        <th>期間</th>
-                                        <th>合計</th>
+                                        <th>------------</th>
+                                        <th class="grayCell">合計</th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
@@ -110,33 +113,56 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                     <tbody>
                                     <tr>
                                         <td><?if(isset($period_script)){ echo $period_script[0]; }?></td>
-                                        <th><?if(isset($total)){ echo '¥'.number_format($total['sales']); }?></th>
+                                        <th class="grayCell"><?if(isset($total)){ echo '¥'.number_format($total['sales']); }?></th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
-                                                    <td>¥<?=number_format($ct['sales']);?></td>
+                                                    <td>¥<?=number_format($ct['sales']);?>（<?=floor($ct['sales']/$total['sales']*100);?>%）</td>
                                                 <?endif;?>
                                             <?endforeach;?>
                                         <?endif;?>
                                     </tr>
-                                    <tr>
+                                    <tr class="borderBottom">
                                         <td><?if(isset($period_script)){ echo $period_script[1]; }?></td>
-                                        <th><?if(isset($total)){ echo '¥'.number_format($total['compare_sales']); }?></th>
+                                        <th class="grayCell"><?if(isset($total)){ echo '¥'.number_format($total['compare_sales']); }?></th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
-                                                    <td>¥<?=number_format($ct['compare_sales']);?></td>
+                                                    <td>¥<?=number_format($ct['compare_sales']);?>（<?=floor($ct['compare_sales']/$total['compare_sales']*100);?>%）</td>
                                                 <?endif;?>
                                             <?endforeach;?>
                                         <?endif;?>
                                     </tr>
                                     <tr>
-                                        <td><?if(isset($period_script)){ echo '差分'; }?></td>
-                                        <th class="<? if(isset($total)){ if($total['sales_diff']>0){ echo 'success'; }elseif($total['sales_diff']<0){ echo 'danger'; } } ?>"><?if(isset($total)){ echo number_format($total['sales_diff']); }?></th>
+                                        <td><?if(isset($period_script)){ echo '売上差分'; }?></td>
+                                        <th class="grayCell <? if(isset($total)){ if($total['sales_diff']>0){ $arrow='fa fa-arrow-up';echo 'success'; }elseif($total['sales_diff']<0){ $arrow='fa fa-arrow-down';echo'danger'; }else{ $arrow='fa fa-arrow-right'; } } ?>">
+                                            <i class="<?=$arrow;?>" aria-hidden="true"></i>
+                                            <?if(isset($total)){ echo number_format($total['sales_diff']); }?>
+                                        </th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
                                                 <?if($ct['sales']>0):?>
-                                                    <td class="<?if($ct['sales_diff']>0){ echo 'success'; }elseif($ct['sales_diff']<0){ echo 'danger'; }?>"><?=number_format($ct['sales_diff']);?></td>
+                                                    <td class="<?if($ct['sales_diff']>0){ $arrow='fa fa-arrow-up';echo 'success'; }elseif($ct['sales_diff']<0){ $arrow='fa fa-arrow-down';echo 'danger'; }else{ $arrow='fa fa-arrow-right'; }?>">
+                                                        <i class="<?=$arrow;?>" aria-hidden="true"></i>
+                                                        <?=number_format($ct['sales_diff']);?>
+                                                    </td>
+                                                <?endif;?>
+                                            <?endforeach;?>
+                                        <?endif;?>
+                                    </tr>
+                                    <tr class="grayZone">
+                                        <td style="background: #fff;"><?if(isset($period_script)){ echo '単価差分'; }?></td>
+                                        <td class="grayCell <?if(isset($total)){ if($total['per_num_diff']>0){ $arrow='fa fa-arrow-up';echo 'font-green'; }elseif($total['per_num_diff']<0){ $arrow='fa fa-arrow-down';echo 'font-red'; }else{ $arrow='fa fa-arrow-right'; } } ?>">
+                                            <i class="<?=$arrow;?>" aria-hidden="true"></i>
+                                            <?if(isset($total)){ echo number_format($total['per_num_diff']); }?>
+                                        </td>
+                                        <?if(isset($category_trend)):?>
+                                            <?foreach($category_trend as $ct):?>
+                                                <?if($ct['sales']>0):?>
+                                                    <td class="<?if($ct['per_num_diff']>0){ $arrow='fa fa-arrow-up';echo 'font-green'; }elseif($ct['per_num_diff']<0){ $arrow='fa fa-arrow-down';echo 'font-red'; }else{ $arrow='fa fa-arrow-right'; }?>">
+                                                        <i class="<?=$arrow;?>" aria-hidden="true"></i>
+                                                        <?=number_format($ct['per_num_diff']);?>
+                                                    </td>
                                                 <?endif;?>
                                             <?endforeach;?>
                                         <?endif;?>
@@ -156,6 +182,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                     <th>前回から</th>
                                     <th>メニュー</th>
                                     <th>カテゴリ</th>
+                                    <th>売価</th>
                                     <th>出数（比較元）</th>
                                     <th>出数（比較先）</th>
                                     <th>出数差分</th>
@@ -171,6 +198,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                             <td><i class="<?=$arrow;?>" aria-hidden="true"></i> <?= $rank_diff; ?></td>
                                             <td><?= $mt['menu_name']; ?></td>
                                             <td><?= $mt['category_name']; ?></td>
+                                            <td>¥<?= floor($mt['price']); ?></td>
                                             <td><?= number_format($mt['order_num']); ?></td>
                                             <td><?= number_format($mt['compare_order_num']); ?></td>
                                             <td><?= number_format($mt['order_num']-$mt['compare_order_num']); ?></td>
