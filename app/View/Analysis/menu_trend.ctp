@@ -102,9 +102,61 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <th>------------</th>
                                         <th class="grayCell">合計</th>
                                         <?if(isset($category_trend)):?>
-                                            <?foreach($category_trend as $ct):?>
+                                            <?foreach($category_trend as $key => $ct):?>
                                                 <?if($ct['sales']>0):?>
-                                                <th><?=$ct['category_name'];?></th>
+                                                    <!--Modal View-->
+                                                    <div id="categoryDetail_<?=$key;?>" class="modal fade in" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h4 class="modal-title">客単価情報</h4>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <form class="form-horizontal" role="form">
+                                                                        <div class="form-body">
+                                                                            <h3 class="form-section">「<?=$ct['category_name'];?>」に属するメニューが頼まれた時の客単価</h3>
+                                                                            <div class="row">
+                                                                                <div class="col-md-4">
+                                                                                    <div class="form-group">
+                                                                                        <label class="control-label col-md-6">客単価</label>
+                                                                                        <div class="col-md-6">
+                                                                                            <p class="form-control-static"> ¥<?=number_format($ct['per_visitor']);?> </p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4">
+                                                                                    <div class="form-group">
+                                                                                        <label class="control-label col-md-6">平均客単</label>
+                                                                                        <div class="col-md-6">
+                                                                                            <p class="form-control-static"> ¥<?=number_format($ct['compare_per_visitor']);?> </p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-4">
+                                                                                    <div class="form-group">
+                                                                                        <label class="control-label col-md-6">客単差分</label>
+                                                                                        <div class="col-md-6">
+                                                                                            <p class="form-control-static"> <?=number_format($ct['per_visitor_diff']);?> </p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" data-dismiss="modal" class="btn default">閉じる</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--Modal End-->
+                                                    <th>
+                                                        <a data-toggle="modal" href="#categoryDetail_<?=$key;?>">
+                                                            <?=$ct['category_name'];?>
+                                                            <i class="fa fa-question-circle" aria-hidden="true"></i>
+                                                        </a>
+                                                    </th>
                                                 <?endif;?>
                                             <?endforeach;?>
                                         <?endif;?>
@@ -193,7 +245,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                     <?foreach ($menu_trend as $key => $mt): ?>
                                         <?$rank=$key+1;$rank_diff=$mt['compare_rank']-$rank;?>
                                         <?if($rank_diff>0){ $arrow='fa fa-arrow-up'; }elseif($rank_diff<0){ $arrow='fa fa-arrow-down'; }else{ $arrow='fa fa-arrow-right'; } ?>
-                                        <tr class="<?if(abs($rank_diff)>=5 && abs($mt['order_num']-$mt['compare_order_num'])>=5){ if($rank_diff>0){ echo 'success';}else{ echo 'danger';} } ?>">
+                                        <tr class="<?if(abs($rank_diff)>=5 || abs($mt['order_num']-$mt['compare_order_num'])>=10){ if($rank_diff>0){ echo 'success';}else{ echo 'danger';} } ?>">
                                             <td><?= $key+1; ?></td>
                                             <td><i class="<?=$arrow;?>" aria-hidden="true"></i> <?= $rank_diff; ?></td>
                                             <td><?= $mt['menu_name']; ?></td>

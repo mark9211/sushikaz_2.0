@@ -449,8 +449,11 @@ class AnalysisController extends AppController{
 
 	# category trend
 	private function get_category_trend($location_id, $breakdown_name, $fd, $start_date, $end_date, $compare_start_date, $compare_end_date){
+		# group concat 文字数設定
+		$this->OrderSummary->query("set group_concat_max_len = 10000000");
 		$result = $this->OrderSummary->find('all', array(
 			'fields' =>  [
+				"GROUP_CONCAT(DISTINCT OrderSummary.receipt_id SEPARATOR ',') as receipt_list",
 				"max(OrderSummary.category_name) as category_name",
 				"sum(CASE WHEN OrderSummary.working_day >= '$start_date' AND OrderSummary.working_day <= '$end_date' AND OrderSummary.price > 0 THEN OrderSummary.price * OrderSummary.order_num WHEN OrderSummary.working_day >= '$start_date' AND OrderSummary.working_day <= '$end_date' AND OrderSummary.price < 0 THEN OrderSummary.price * OrderSummary.order_num * -1 END) as sales",
 				"sum(CASE WHEN OrderSummary.working_day >= '$start_date' AND OrderSummary.working_day <= '$end_date' THEN OrderSummary.order_num END) as order_num",
@@ -469,19 +472,43 @@ class AnalysisController extends AppController{
 		$new_arr=[];$ts=0;$cts=0;$to=0;$cto=0;
 		if($result!=null){
 			foreach($result as $key => $r){
+				# receipt info
+				$array = implode("','",explode(',', $r[0]['receipt_list']));
+				$fields = [
+					"sum(CASE WHEN ReceiptSummary.receipt_id in ('$array') THEN ReceiptSummary.total END) as menu_total",
+					"sum(CASE WHEN ReceiptSummary.receipt_id in ('$array') THEN ReceiptSummary.visitors END) as menu_visitors",
+					"sum(ReceiptSummary.total) as total",
+					"sum(ReceiptSummary.visitors) as visitors",
+				];
+				$result_r = $this->ReceiptSummary->find('first', array(
+					'fields' => $fields,
+					'conditions' => array(
+						'ReceiptSummary.location_id' => $location_id,
+						'ReceiptSummary.working_day >=' => $start_date,
+						'ReceiptSummary.working_day <=' => $end_date,
+						'ReceiptSummary.breakdown_name' => $breakdown_name,
+					),
+				));
+				# division zero 回避
+				$r[0]['per_visitor'] = 0;
+				if($result_r[0]['menu_visitors']!=0){
+					$r[0]['per_visitor'] = floor($result_r[0]['menu_total']/$result_r[0]['menu_visitors']);
+				}
+				$r[0]['compare_per_visitor'] = 0;
+				if($result_r[0]['visitors']!=0){
+					$r[0]['compare_per_visitor'] = floor($result_r[0]['total']/$result_r[0]['visitors']);
+				}
+				$r[0]['per_visitor_diff'] = $r[0]['per_visitor'] - $r[0]['compare_per_visitor'];
 				$r[0]['sales_diff']=$r[0]['sales']-$r[0]['compare_sales'];
 				$r[0]['order_diff']=$r[0]['order_num']-$r[0]['compare_order_num'];
+				# division zero 回避
+				$r[0]['per_num']=0;
 				if($r[0]['order_num']!=0){
 					$r[0]['per_num']=floor($r[0]['sales']/$r[0]['order_num']);
 				}
-				else{
-					$r[0]['per_num']=0;
-				}
+				$r[0]['compare_per_num']=0;
 				if($r[0]['compare_order_num']!=0){
 					$r[0]['compare_per_num']=floor($r[0]['compare_sales']/$r[0]['compare_order_num']);
-				}
-				else{
-					$r[0]['compare_per_num']=0;
 				}
 				$r[0]['per_num_diff']=$r[0]['per_num']-$r[0]['compare_per_num'];
 				$new_arr[] = $r[0];
