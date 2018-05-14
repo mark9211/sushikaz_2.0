@@ -441,7 +441,10 @@ class AnalysisController extends AppController{
 			}
 		}
 		array_multisort($sort_arr, SORT_DESC, $new_arr);
-		return [0=>['total_num'=>$total_num,'compare_total_num'=>$compare_total_num],1=>$new_arr];
+		return [
+			0=>['total_num'=>$total_num,'compare_total_num'=>$compare_total_num],
+			1=>$new_arr
+		];
 	}
 
 	# category trend
@@ -468,8 +471,18 @@ class AnalysisController extends AppController{
 			foreach($result as $key => $r){
 				$r[0]['sales_diff']=$r[0]['sales']-$r[0]['compare_sales'];
 				$r[0]['order_diff']=$r[0]['order_num']-$r[0]['compare_order_num'];
-				$r[0]['per_num']=floor($r[0]['sales']/$r[0]['order_num']);
-				$r[0]['compare_per_num']=floor($r[0]['compare_sales']/$r[0]['compare_order_num']);
+				if($r[0]['order_num']!=0){
+					$r[0]['per_num']=floor($r[0]['sales']/$r[0]['order_num']);
+				}
+				else{
+					$r[0]['per_num']=0;
+				}
+				if($r[0]['compare_order_num']!=0){
+					$r[0]['compare_per_num']=floor($r[0]['compare_sales']/$r[0]['compare_order_num']);
+				}
+				else{
+					$r[0]['compare_per_num']=0;
+				}
 				$r[0]['per_num_diff']=$r[0]['per_num']-$r[0]['compare_per_num'];
 				$new_arr[] = $r[0];
 				$ts += $r[0]['sales'];
@@ -478,7 +491,20 @@ class AnalysisController extends AppController{
 				$cto+=$r[0]['compare_order_num'];
 			}
 		}
-		return [0=>['sales'=>$ts,'compare_sales'=>$cts,'sales_diff'=>$ts-$cts, 'order_num'=>$to,'compare_order_num'=>$cto,'order_diff'=>$to-$cto, 'per_num'=>floor($ts/$cto), 'compare_per_num'=>floor($to/$to), 'per_num_diff'=>floor($ts/$cto)-floor($to/$to)],1=>$new_arr];
+		return [
+			0 => [
+				'sales'=>$ts,
+				'compare_sales'=>$cts,
+				'sales_diff'=>$ts-$cts,
+				'order_num'=>$to,
+				'compare_order_num'=>$cto,
+				'order_diff'=>$to-$cto,
+				'per_num'=>floor($ts/$to),
+				'compare_per_num'=>floor($cts/$cto),
+				'per_num_diff'=>floor($ts/$to)-floor($cts/$cto),
+			],
+			1 => $new_arr
+		];
 	}
 
 }
