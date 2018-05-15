@@ -425,6 +425,7 @@ class AnalysisController extends AppController{
 				'OrderSummary.location_id' => $location_id,
 				'OrderSummary.breakdown_name' => $breakdown_name,
 				'OrderSummary.fd' => $fd,
+				'OrderSummary.working_day >=' => $compare_start_date,
 				'NOT' => array('OrderSummary.category_name' => ''),
 			),
 			'group' => array('OrderSummary.menu_name'),
@@ -432,12 +433,18 @@ class AnalysisController extends AppController{
 		));
 		$new_arr=[];$sort_arr=[];$total_num=0;$compare_total_num=0;
 		if($result!=null){
+			# sum取得
+			foreach($result as $key => $r){
+				$total_num+=$r[0]['order_num'];
+				$compare_total_num+=$r[0]['compare_order_num'];
+			}
+			# values補完
 			foreach($result as $key => $r){
 				$r[0]['compare_rank'] = $key+1;
+				$r[0]['c_rate'] = $r[0]['order_num']/$total_num;
+				$r[0]['compare_c_rate'] = $r[0]['compare_order_num']/$compare_total_num;
 				$new_arr[] = $r[0];
 				$sort_arr[$key] = $r[0]['order_num'];
-				$total_num+=$r[0]['order_num']*$r[0]['price'];
-				$compare_total_num+=$r[0]['compare_order_num']*$r[0]['price'];
 			}
 		}
 		array_multisort($sort_arr, SORT_DESC, $new_arr);

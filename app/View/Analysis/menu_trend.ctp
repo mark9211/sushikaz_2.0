@@ -163,8 +163,9 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                     </tr>
                                     </thead>
                                     <tbody>
+                                    <?if(isset($period_script)):?>
                                     <tr>
-                                        <td><?if(isset($period_script)){ echo $period_script[0]; }?></td>
+                                        <td><?=$period_script[0];?></td>
                                         <th class="grayCell"><?if(isset($total)){ echo '¥'.number_format($total['sales']); }?></th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
@@ -175,7 +176,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <?endif;?>
                                     </tr>
                                     <tr class="borderBottom">
-                                        <td><?if(isset($period_script)){ echo $period_script[1]; }?></td>
+                                        <td><?=$period_script[1];?></td>
                                         <th class="grayCell"><?if(isset($total)){ echo '¥'.number_format($total['compare_sales']); }?></th>
                                         <?if(isset($category_trend)):?>
                                             <?foreach($category_trend as $ct):?>
@@ -186,7 +187,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <?endif;?>
                                     </tr>
                                     <tr>
-                                        <td><?if(isset($period_script)){ echo '売上差分'; }?></td>
+                                        <td>売上差分</td>
                                         <th class="grayCell <? if(isset($total)){ if($total['sales_diff']>0){ $arrow='fa fa-arrow-up';echo 'success'; }elseif($total['sales_diff']<0){ $arrow='fa fa-arrow-down';echo'danger'; }else{ $arrow='fa fa-arrow-right'; } } ?>">
                                             <i class="<?=$arrow;?>" aria-hidden="true"></i>
                                             <?if(isset($total)){ echo number_format($total['sales_diff']); }?>
@@ -203,7 +204,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <?endif;?>
                                     </tr>
                                     <tr class="grayZone">
-                                        <td style="background: #fff;"><?if(isset($period_script)){ echo '単価差分'; }?></td>
+                                        <td style="background: #fff;">単価差分</td>
                                         <td class="grayCell <?if(isset($total)){ if($total['per_num_diff']>0){ $arrow='fa fa-arrow-up';echo 'font-green'; }elseif($total['per_num_diff']<0){ $arrow='fa fa-arrow-down';echo 'font-red'; }else{ $arrow='fa fa-arrow-right'; } } ?>">
                                             <i class="<?=$arrow;?>" aria-hidden="true"></i>
                                             <?if(isset($total)){ echo number_format($total['per_num_diff']); }?>
@@ -219,6 +220,7 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                             <?endforeach;?>
                                         <?endif;?>
                                     </tr>
+                                    <?endif;?>
                                     </tbody>
                                 </table>
                             </div>
@@ -232,12 +234,12 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                 <tr>
                                     <th>順位</th>
                                     <th>前回から</th>
+                                    <th>出数差分</th>
                                     <th>メニュー</th>
                                     <th>カテゴリ</th>
                                     <th>売価</th>
-                                    <th>出数（比較元）</th>
-                                    <th>出数（比較先）</th>
-                                    <th>出数差分</th>
+                                    <th>出数</th>
+                                    <th>構成比</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -248,12 +250,12 @@ echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
                                         <tr class="<?if(abs($rank_diff)>=5 || abs($mt['order_num']-$mt['compare_order_num'])>=10){ if($rank_diff>0){ echo 'success';}else{ echo 'danger';} } ?>">
                                             <td><?= $key+1; ?></td>
                                             <td><i class="<?=$arrow;?>" aria-hidden="true"></i> <?= $rank_diff; ?></td>
+                                            <td><?= number_format($mt['order_num']-$mt['compare_order_num']); ?></td>
                                             <td><?= $mt['menu_name']; ?></td>
                                             <td><?= $mt['category_name']; ?></td>
                                             <td>¥<?= floor($mt['price']); ?></td>
-                                            <td><?= number_format($mt['order_num']); ?></td>
-                                            <td><?= number_format($mt['compare_order_num']); ?></td>
-                                            <td><?= number_format($mt['order_num']-$mt['compare_order_num']); ?></td>
+                                            <td><?= $mt['order_num'];?></td>
+                                            <td><?= floor($mt['c_rate']*10000)/100;?>%</td>
                                         </tr>
                                     <?endforeach; ?>
                                 <?endif;?>
