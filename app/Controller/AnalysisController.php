@@ -108,6 +108,13 @@ class AnalysisController extends AppController{
 					$compare_end_date = date("Y-m-d",strtotime("last day of - 2 month"));
 					$compare_start_date = date("Y-m-d",strtotime("first day of - 2 month"));
 					break;
+				case $period_type==4:
+					$period_script = ['前月', '昨年同月'];
+					$end_date = date("Y-m-d",strtotime("last day of - 1 month"));
+					$start_date = date("Y-m-d",strtotime("first day of - 1 month"));
+					$compare_end_date = date("Y-m-d",strtotime("last day of - 13 month"));
+					$compare_start_date = date("Y-m-d",strtotime("first day of - 13 month"));
+					break;
 				default:
 					echo 'Period Type Error';exit;
 					break;
@@ -119,6 +126,9 @@ class AnalysisController extends AppController{
 			# メニュー差分
 			$menu_trend = $this->get_menu_trend($location['Location']['id'], $breakdown_name, $fd, $start_date, $end_date, $compare_start_date, $compare_end_date);
 			$this->set('menu_trend', $menu_trend[1]);
+			# receipt差分
+			$receipt_trend = $this->get_receipt_trend($location['Location']['id'], $breakdown_name, $start_date, $end_date, $compare_start_date, $compare_end_date);
+			$this->set('receipt_trend', $receipt_trend);
 			# params
 			$this->set('breakdown_name', $breakdown_name);
 			$this->set('fd_name', $fd);
@@ -441,8 +451,8 @@ class AnalysisController extends AppController{
 			# values補完
 			foreach($result as $key => $r){
 				$r[0]['compare_rank'] = $key+1;
-				$r[0]['c_rate'] = $r[0]['order_num']/$total_num;
-				$r[0]['compare_c_rate'] = $r[0]['compare_order_num']/$compare_total_num;
+				$r[0]['c_rate'] = $this->division_zero($r[0]['order_num'],$total_num);
+				$r[0]['compare_c_rate'] = $this->division_zero($r[0]['compare_order_num'],$compare_total_num);
 				$new_arr[] = $r[0];
 				$sort_arr[$key] = $r[0]['order_num'];
 			}
@@ -471,10 +481,11 @@ class AnalysisController extends AppController{
 				'OrderSummary.location_id' => $location_id,
 				'OrderSummary.breakdown_name' => $breakdown_name,
 				'OrderSummary.fd' => $fd,
+				'OrderSummary.working_day >=' => $compare_start_date,
 				'NOT' => array('OrderSummary.category_name' => ''),
 			),
 			'group' => array('OrderSummary.category_name'),
-			'order' => array('sales DESC'),
+			'order' => array('order_num DESC'),
 		));
 		$new_arr=[];$ts=0;$cts=0;$to=0;$cto=0;
 		if($result!=null){
@@ -496,27 +507,13 @@ class AnalysisController extends AppController{
 						'ReceiptSummary.breakdown_name' => $breakdown_name,
 					),
 				));
-				# division zero 回避
-				$r[0]['per_visitor'] = 0;
-				if($result_r[0]['menu_visitors']!=0){
-					$r[0]['per_visitor'] = floor($result_r[0]['menu_total']/$result_r[0]['menu_visitors']);
-				}
-				$r[0]['compare_per_visitor'] = 0;
-				if($result_r[0]['visitors']!=0){
-					$r[0]['compare_per_visitor'] = floor($result_r[0]['total']/$result_r[0]['visitors']);
-				}
+				$r[0]['per_visitor'] = floor($this->division_zero($result_r[0]['menu_total'],$result_r[0]['menu_visitors']));
+				$r[0]['compare_per_visitor'] = floor($this->division_zero($result_r[0]['total'],$result_r[0]['visitors']));
 				$r[0]['per_visitor_diff'] = $r[0]['per_visitor'] - $r[0]['compare_per_visitor'];
 				$r[0]['sales_diff']=$r[0]['sales']-$r[0]['compare_sales'];
 				$r[0]['order_diff']=$r[0]['order_num']-$r[0]['compare_order_num'];
-				# division zero 回避
-				$r[0]['per_num']=0;
-				if($r[0]['order_num']!=0){
-					$r[0]['per_num']=floor($r[0]['sales']/$r[0]['order_num']);
-				}
-				$r[0]['compare_per_num']=0;
-				if($r[0]['compare_order_num']!=0){
-					$r[0]['compare_per_num']=floor($r[0]['compare_sales']/$r[0]['compare_order_num']);
-				}
+				$r[0]['per_num']=floor($this->division_zero($r[0]['sales'],$r[0]['order_num']));
+				$r[0]['compare_per_num']=floor($this->division_zero($r[0]['compare_sales'],$r[0]['compare_order_num']));
 				$r[0]['per_num_diff']=$r[0]['per_num']-$r[0]['compare_per_num'];
 				$new_arr[] = $r[0];
 				$ts += $r[0]['sales'];
@@ -533,12 +530,41 @@ class AnalysisController extends AppController{
 				'order_num'=>$to,
 				'compare_order_num'=>$cto,
 				'order_diff'=>$to-$cto,
-				'per_num'=>floor($ts/$to),
-				'compare_per_num'=>floor($cts/$cto),
-				'per_num_diff'=>floor($ts/$to)-floor($cts/$cto),
+				'per_num'=>floor($this->division_zero($ts,$to)),
+				'compare_per_num'=>floor($this->division_zero($cts,$cto)),
+				'per_num_diff'=>floor($this->division_zero($ts,$to))-floor($this->division_zero($cts,$cto)),
 			],
 			1 => $new_arr
 		];
 	}
+
+	# receipt trend
+	private function get_receipt_trend($location_id, $breakdown_name, $start_date, $end_date, $compare_start_date, $compare_end_date){
+		$result = $this->ReceiptSummary->find('first', array(
+			'fields' =>  [
+				"sum(CASE WHEN ReceiptSummary.working_day >= '$start_date' AND ReceiptSummary.working_day <= '$end_date' THEN ReceiptSummary.total END) as sales",
+				"sum(CASE WHEN ReceiptSummary.working_day >= '$start_date' AND ReceiptSummary.working_day <= '$end_date' THEN ReceiptSummary.visitors END) as visitors",
+				"sum(CASE WHEN ReceiptSummary.working_day >= '$compare_start_date' AND ReceiptSummary.working_day <= '$compare_end_date' THEN ReceiptSummary.total END) as compare_sales",
+				"sum(CASE WHEN ReceiptSummary.working_day >= '$compare_start_date' AND ReceiptSummary.working_day <= '$compare_end_date' THEN ReceiptSummary.visitors END) as compare_visitors",
+			],
+			'conditions' => array(
+				'ReceiptSummary.location_id' => $location_id,
+				'ReceiptSummary.breakdown_name' => $breakdown_name,
+			),
+		));
+		$result[0]['visitors_diff'] = $result[0]['visitors'] - $result[0]['compare_visitors'];
+		$result[0]['per_visitors'] = floor($this->division_zero($result[0]['sales'], $result[0]['visitors']));
+		$result[0]['compare_per_visitors'] = floor($this->division_zero($result[0]['compare_sales'], $result[0]['compare_visitors']));
+		$result[0]['per_visitors_diff'] = $result[0]['per_visitors'] - $result[0]['compare_per_visitors'];
+		return $result[0];
+	}
+
+	# division func
+	private function division_zero($numer,$denom){
+		$a = 0;
+		if($denom!=0){ $a = $numer / $denom; }
+		return $a;
+	}
+
 
 }
