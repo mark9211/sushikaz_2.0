@@ -141,6 +141,14 @@ class AnalysisController extends AppController{
 		}
 	}
 
+	public function labor(){
+		# Title
+		$this->set('title_for_layout', '労働時間分析');
+		# クッキー値
+		$location = $this->myData;
+		$this->sales_visitors_hours_by_timezone($location['Location']['id'], '2018-02-01', '2018-05-01');
+	}
+
 	# init menus
 	private function get_menus($location_id){
 		$menus = $this->OrderSummary->find('all', array(
@@ -564,6 +572,161 @@ class AnalysisController extends AppController{
 		$a = 0;
 		if($denom!=0){ $a = $numer / $denom; }
 		return $a;
+	}
+
+	#時間帯別売上労働時間
+	private function sales_visitors_hours_by_timezone($location_id, $start_date, $end_date){
+		$ar = $this->AttendanceResult->find('all', [
+			'conditions' => [
+				'AttendanceResult.location_id' => $location_id,
+				'AttendanceResult.working_day >=' => $start_date,
+				'AttendanceResult.working_day <' => $end_date,
+			],
+			'order' => ['AttendanceResult.working_day']
+		]);
+		$arr = [];$arr2 = [];$arr3 = [];
+		foreach($ar as $ar_f){
+			$attendance_start = $ar_f['AttendanceResult']['attendance_start'];
+			$attendance_end = $ar_f['AttendanceResult']['attendance_end'];
+			$member_id = $ar_f['AttendanceResult']['member_id'];
+			$working_day = $ar_f['AttendanceResult']['working_day'];
+			$n_working_day = date("Y-m-d", strtotime($working_day."+1 day"));
+			$time_zone = [
+				"$working_day 09:00:00",
+				"$working_day 10:00:00",
+				"$working_day 11:00:00",
+				"$working_day 12:00:00",
+				"$working_day 13:00:00",
+				"$working_day 14:00:00",
+				"$working_day 15:00:00",
+				"$working_day 16:00:00",
+				"$working_day 17:00:00",
+				"$working_day 18:00:00",
+				"$working_day 19:00:00",
+				"$working_day 20:00:00",
+				"$working_day 21:00:00",
+				"$working_day 22:00:00",
+				"$working_day 23:00:00",
+				"$n_working_day 00:00:00",
+			];
+			# 休憩開始
+			$type_id = 3;
+			$a_bs = $this->Attendance->find('first', [
+				'conditions' => [
+					'Attendance.member_id' => $member_id,
+					'Attendance.working_day' => $working_day,
+					'Attendance.type_id' => $type_id,
+				]
+			]);
+			if($a_bs!=null){
+				$break_start = $a_bs['Attendance']['time'];
+			}
+			else{
+				$break_start = null;
+			}
+			# 休憩終了
+			$type_id = 4;
+			$a_be = $this->Attendance->find('first', [
+				'conditions' => [
+					'Attendance.member_id' => $member_id,
+					'Attendance.working_day' => $working_day,
+					'Attendance.type_id' => $type_id,
+				]
+			]);
+			if($a_be!=null){
+				$break_end = $a_be['Attendance']['time'];
+			}
+			else{
+				$break_end = null;
+			}
+			foreach($time_zone as $time_zone_f){
+				$timestamp = strtotime($time_zone_f);
+				$G = date("G", $timestamp);
+				$hours = 0;
+				# 休憩あり
+				if($break_start!=null && $break_end!=null){
+					if($G==date("G", strtotime($attendance_start))){
+						$diff = abs($timestamp - strtotime($attendance_start));
+						$hours = 1 - $diff/60/60;
+					}
+					elseif($G==date("G", strtotime($attendance_end))){
+						$diff = abs($timestamp - strtotime($attendance_end));
+						$hours = $diff/60/60;
+					}
+					elseif($G==date("G", strtotime($break_start))){
+						$diff = abs($timestamp - strtotime($break_start));
+						$hours = $diff/60/60;
+					}
+					elseif($G==date("G", strtotime($break_end))){
+						$diff = abs($timestamp - strtotime($break_end));
+						$hours = 1 - $diff/60/60;
+					}
+					elseif(
+						($timestamp - strtotime($attendance_start)) >= 360 &&
+						(strtotime($attendance_end) - $timestamp) >= 360 &&
+						$G != date("G", strtotime($break_start)) &&
+						$G != date("G", strtotime($break_end))
+					){
+						$hours = 1;
+					}
+				}
+				else{
+					if($G==date("G", strtotime($attendance_start))){
+						$diff = abs($timestamp - strtotime($attendance_start));
+						$hours = 1 - $diff/60/60;
+					}
+					elseif($G==date("G", strtotime($attendance_end))){
+						$diff = abs($timestamp - strtotime($attendance_end));
+						$hours = $diff/60/60;
+					}
+					elseif(
+						($timestamp - strtotime($attendance_start)) >= 360 &&
+						(strtotime($attendance_end) - $timestamp) >= 360
+					){
+						$hours = 1;
+					}
+				}
+				$arr[] = [$working_day, $member_id, $attendance_start, $attendance_end, $break_start, $break_end, $time_zone_f, $hours];
+				if(isset($arr2[$working_day][$time_zone_f])){
+					$arr2[$working_day][$time_zone_f] += $hours;
+				}
+				else{
+					$arr2[$working_day][$time_zone_f] = $hours;
+				}
+			}
+		}
+		# 売上&客数
+		foreach($arr2 as $working_day => $arr2_f){
+			if($arr2_f!=null){
+				foreach($arr2_f as $hour => $arr2_f_f){
+					$rs = $this->ReceiptSummary->find('first', [
+						'fields' =>  [
+							"sum(ReceiptSummary.total) as sales",
+							"sum(ReceiptSummary.visitors) as visitors",
+						],
+						'conditions' => [
+							'ReceiptSummary.location_id' => $location_id,
+							'ReceiptSummary.visiting_time >=' => $hour,
+							'ReceiptSummary.visiting_time <' => date('Y-m-d H:i:s', strtotime($hour."+1 hour")),
+						]
+					]);
+					$sales = $rs[0]['sales'];
+					if($sales==null){ $sales = 0; }
+					$visitors = $rs[0]['visitors'];
+					if($visitors==null){ $visitors = 0; }
+					$arr3[] = ['business_day'=>$working_day, 'timezone'=>$hour, 'sales'=>$sales, 'visitors'=>$visitors, 'labor_hours'=>$arr2_f_f];
+				}
+			}
+		}
+		$path = realpath(WWW_ROOT);
+		$path .= '/excel/labor.csv';
+		$f = fopen($path, "w");
+		if($f){
+			foreach($arr3 as $line){
+				fputcsv($f, $line);
+			}
+		}
+		fclose($f);
 	}
 
 

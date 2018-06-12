@@ -24,6 +24,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css">
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans+SC:300 rel="stylesheet">
     <?php
     echo $this->Html->meta('icon');
 
@@ -31,22 +33,20 @@
     echo $this->fetch('css');
     echo $this->fetch('script');
 
-    #BEGIN GLOBAL MANDATORY STYLES
+    # BEGIN GLOBAL MANDATORY STYLES
     echo $this->Html->css('assets/global/plugins/font-awesome/css/font-awesome.min.css');
     echo $this->Html->css('assets/global/plugins/simple-line-icons/simple-line-icons.min.css');
     echo $this->Html->css('assets/global/plugins/bootstrap/css/bootstrap.min.css');
     echo $this->Html->css('assets/global/plugins/uniform/css/uniform.default.css');
-    #BEGIN THEME STYLES
+    # BEGIN THEME STYLES
     echo $this->Html->css('assets/global/css/components-rounded.css', array('id'=>'style_components'));
     echo $this->Html->css('assets/global/css/plugins.css');
     echo $this->Html->css('assets/admin/layout3/css/layout.css');
     echo $this->Html->css('assets/admin/layout3/css/themes/default.css', array('id'=>'style_color'));
     echo $this->Html->css('assets/admin/layout3/css/custom.css');
-
-    #base js
+    # base js
     echo $this->Html->script('js/modernizr-2.6.2.min.js');
-
-    #plugin js
+    # plugin js
     echo $this->Html->script('assets/global/plugins/jquery.min.js');
     echo $this->Html->script('assets/global/plugins/jquery-migrate.min.js');
     echo $this->Html->script('assets/global/plugins/jquery-ui/jquery-ui.min.js');
@@ -56,9 +56,8 @@
     echo $this->Html->script('assets/global/plugins/jquery.blockui.min.js');
     echo $this->Html->script('assets/global/plugins/jquery.cokie.min.js');
     echo $this->Html->script('assets/global/plugins/uniform/jquery.uniform.min.js');
-
-    echo $this->Html->script('assets/global/scripts/metronic.js');
-    echo $this->Html->script('assets/admin/layout3/scripts/layout.js');
+    echo $this->Html->script('jquery.ui.touch-punch.min.js');
+    # layout
     echo $this->Html->script('assets/admin/layout3/scripts/demo.js');
     echo $this->Html->script('assets/admin/pages/scripts/ui-datepaginator.js');
     echo $this->Html->script('assets/admin/pages/scripts/components-form-tools.js');
