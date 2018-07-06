@@ -146,7 +146,7 @@ class AnalysisController extends AppController{
 		$this->set('title_for_layout', '労働時間分析');
 		# クッキー値
 		$location = $this->myData;
-		$this->sales_visitors_hours_by_timezone($location['Location']['id'], '2018-02-01', '2018-05-01');
+		$this->sales_visitors_hours_by_timezone($location['Location']['id'], '2018-06-01', '2018-07-01');
 	}
 
 	# init menus
@@ -608,6 +608,11 @@ class AnalysisController extends AppController{
 				"$working_day 22:00:00",
 				"$working_day 23:00:00",
 				"$n_working_day 00:00:00",
+				"$n_working_day 01:00:00",
+				"$n_working_day 02:00:00",
+				"$n_working_day 03:00:00",
+				"$n_working_day 04:00:00",
+				"$n_working_day 05:00:00",
 			];
 			# 休憩開始
 			$type_id = 3;
