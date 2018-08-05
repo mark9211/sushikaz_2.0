@@ -150,7 +150,10 @@
 								</li>
 								-->
 								<li class="menu-dropdown">
-									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'breakdowns', 'action'=>'index'));?>"'>システム連携</a>
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'breakdowns', 'action'=>'index'));?>"'>POS連携</a>
+								</li>
+								<li class="menu-dropdown">
+									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'labor_records', 'action'=>'index'));?>"'>勤怠連携</a>
 								</li>
 								<li class="menu-dropdown">
 									<a onclick='location.href="<?= $this->Html->url(array('controller'=>'analysis', 'action'=>'index'));?>"'>各種分析</a>

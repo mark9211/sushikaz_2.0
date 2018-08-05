@@ -35,6 +35,15 @@ class Attendance extends AppModel {
 		}
 	}
 
+	public function judge24HourString($working_day, $time){
+		$hour = date('G', strtotime($time));
+		if ($hour < 8) {
+			$working_day = date('Y-m-d', strtotime("$working_day +1 day"));
+			return date('Y-m-d H:i:s', strtotime("$working_day $time"));
+		}
+		return date('Y-m-d H:i:s', strtotime("$working_day $time"));
+	}
+
 	#出退勤判定（現在の状況）
 	public function judgeJobState($working_day, $member_id, $location_id){
 		/*出社しているかどうか*/

@@ -2,7 +2,7 @@
     <div class="portlet light">
         <div class="portlet-title" style="margin-top: 50px;">
             <div class="caption">
-                <span class="caption-subject font-green sbold uppercase">CSV import</span>
+                <span class="caption-subject font-green sbold uppercase">CSV Import</span>
             </div>
         </div>
         <div class="portlet-body form">
