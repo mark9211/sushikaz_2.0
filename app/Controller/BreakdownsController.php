@@ -25,7 +25,11 @@ class BreakdownsController extends AppController{
             $data = [];
             $order_data = [];
             # 店舗条件分岐
-            if($location['Location']['name']=='池袋店'||$location['Location']['name']=='赤羽店'){
+            if($location['Location']['name']=='池袋店'||$location['Location']['name']=='赤羽店'||$location['Location']['name']=='東池袋店'){
+                # brand
+                if($location['Location']['name']=='池袋店'||$location['Location']['name']=='赤羽店'){ $brand = '寿し和'; }
+                elseif($location['Location']['name']=='東池袋店'){ $brand = 'BATON'; }
+                else{ echo 'location error!';exit; }
                 # Airレジ出力CSV連携
                 if(mb_substr($name, 0, 4,"UTF-8")=='会計明細'){
                     #アップロード処理
@@ -55,9 +59,9 @@ class BreakdownsController extends AppController{
                                     # ドリンクカテゴリ
                                     $drink_arr = $this->init_categories($location);
                                     # 商品マート集計
-                                    $order_data = $this->order_group($shaped_records, $drink_arr);
+                                    $order_data = $this->order_group($shaped_records, $drink_arr, $brand);
                                     # レシート毎集計
-                                    $data = $this->group_array($shaped_records, $drink_arr);
+                                    $data = $this->group_array($shaped_records, $drink_arr, $brand);
                                 }
                             }
                         }
@@ -176,6 +180,9 @@ class BreakdownsController extends AppController{
         elseif($location['Location']['name']=='赤羽店'){
             $arr=array("ソフトドリンク", "割り物", "焼酎ボトル", "焼酎グラス", "サワー・カクテル", "ウイスキー", "ウィスキー", "ワイン", "日本酒", "ビール");
         }
+        elseif($location['Location']['name']=='東池袋店'){
+            $arr=array("ランチドリンク", "ビール", "日本酒", "焼酎", "サワー・カクテル", "ワイン", "ウイスキー", "ソフトドリンク", "飲み放題");
+        }
         return $arr;
     }
 
@@ -196,7 +203,7 @@ class BreakdownsController extends AppController{
     }
 
     # Airレジカテゴリ設定を元にorderの振り分けを行う
-    private function order_group($shaped_records, $drink_arr){
+    private function order_group($shaped_records, $drink_arr, $brand){
         $arr=[];
         if($shaped_records!=null){
             foreach($shaped_records as $working_day => $order){
@@ -205,7 +212,6 @@ class BreakdownsController extends AppController{
                         if($order_g!=null){
                             foreach($order_g as $o){
                                 # init
-                                $brand = "寿し和";
                                 $flag = "アラカルト";
                                 $fd = "フード";
                                 # ランチメニューが入っているか否か
@@ -235,7 +241,7 @@ class BreakdownsController extends AppController{
     }
 
     # Airレジカテゴリ設定を元にレシートの振り分けを行う
-    private function group_array($shaped_records, $drink_arr){
+    private function group_array($shaped_records, $drink_arr, $brand){
         $arr=[];
         if($shaped_records!=null){
             foreach($shaped_records as $working_day => $receipt){
@@ -254,7 +260,6 @@ class BreakdownsController extends AppController{
                             $quantity = 0;
                             $time = null;
                             $visiting_time = null;
-                            $brand = "寿し和";
                             $flag = "アラカルト";
                             foreach($receipt_g as $r){
                                 # ランチメニューが入っているか否か
@@ -278,7 +283,7 @@ class BreakdownsController extends AppController{
                                 if($r[5]!=null){ $tax = (int)$r[5]; }
                                 if($r[18]!=null){ $visitor = (int)$r[18]; }
                                 if($r[19]!=null){ $quantity = (int)$r[19]; }
-                                if($r[14]!=null){ $credit = (int)$r[14]; }
+                                if($r[14]!=null){ $credit = (int)$r[8]+(int)$r[9]+(int)$r[11]+(int)$r[14]; }
                                 if($r[13]!=null){ $voucher = (int)$r[13]; }
                                 if($r[17]!=null){ $discount = (int)$r[17]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
