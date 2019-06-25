@@ -162,7 +162,7 @@ class ReceiptSummary extends AppModel {
     }
 
     private function brand_init(){
-        $arr = ['寿し和', '和香苑'];
+        $arr = ['寿し和', '和香苑', 'BATON'];
         return $arr;
     }
 

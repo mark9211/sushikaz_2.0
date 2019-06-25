@@ -394,7 +394,6 @@ class SalesController extends AppController{
 			$location = $this->myData;
 			#売上/客数/客単
 			$brand_summaries = $this->ReceiptSummary->brandSummarize($location['Location']['id'], $working_day);
-			debug($brand_summaries);
 			$new_brand_summaries = [];
 			if($brand_summaries!=null){
 				foreach($brand_summaries as $brand_name => $brand_summary){
