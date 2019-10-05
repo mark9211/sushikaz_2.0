@@ -263,7 +263,7 @@ class BreakdownsController extends AppController{
                             $flag = "アラカルト";
                             foreach($receipt_g as $r){
                                 # ランチメニューが入っているか否か
-                                if($r[24]=="ランチ"&&$r[28]>0){
+                                if( ($r[24]=="ランチ"||$r[24]=="ランチドリンク") &&$r[28]>0){
                                     $flag = "ランチ";
                                 }
                                 #  テイクアウトメニューが入っているか否か
