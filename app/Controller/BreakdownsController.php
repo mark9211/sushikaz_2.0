@@ -175,13 +175,13 @@ class BreakdownsController extends AppController{
     private function init_categories($location){
         $arr = [];
         if($location['Location']['name']=='池袋店'){
-            $arr=array("ビール", "ウイスキー", "ウィスキー", "焼酎", "サワー", "ワイン", "ソフトドリンク", "日本酒", "果実酒", "割り物", "飲み放題");
+            $arr = ["ビール", "ウイスキー", "ウィスキー", "焼酎", "サワー", "ワイン", "ソフトドリンク", "日本酒", "果実酒", "割り物", "飲み放題"];
         }
         elseif($location['Location']['name']=='赤羽店'){
-            $arr=array("ソフトドリンク", "割り物", "焼酎ボトル", "焼酎グラス", "サワー・カクテル", "ウイスキー", "ウィスキー", "ワイン", "日本酒", "ビール", "飲み放題");
+            $arr = ["ソフトドリンク", "割り物", "焼酎ボトル", "焼酎グラス", "サワー・カクテル", "ウイスキー", "ウィスキー", "ワイン", "日本酒", "ビール", "飲み放題"];
         }
         elseif($location['Location']['name']=='東池袋店'){
-            $arr=array("ランチドリンク", "カフェドリンク", "ビール", "日本酒", "焼酎", "サワー・カクテル", "ワイン", "ウイスキー", "ソフトドリンク", "飲み放題", "リキュール");
+            $arr = ["ランチドリンク", "カフェドリンク", "ビール", "日本酒", "焼酎", "サワー・カクテル", "ワイン", "ウイスキー", "ソフトドリンク", "飲み放題", "リキュール"];
         }
         return $arr;
     }
@@ -196,7 +196,7 @@ class BreakdownsController extends AppController{
                     $time = date("Y-m-d H:i:s", strtotime("$record[1] $record[2]"));
                     $working_day = $this->judge24Hour($time);
                 }
-                $arr[$working_day][$record[34]][] = $record;
+                $arr[$working_day][$record[37]][] = $record;
             }
         }
         return $arr;
@@ -215,22 +215,22 @@ class BreakdownsController extends AppController{
                                 $flag = "アラカルト";
                                 $fd = "フード";
                                 # ランチメニューが入っているか否か
-                                if( ($o[24]=="ランチ"||$o[24]=="ランチドリンク") && $o[28]>0){
+                                if( ($o[27]=="ランチ"||$o[27]=="ランチドリンク") && $o[31]>0){
                                     $flag = "ランチ";
                                 }
                                 #  テイクアウトメニューが入っているか否か
-                                elseif($o[24]=="出前"&&$o[28]>0){
+                                elseif($o[27]=="出前"&&$o[31]>0){
                                     $flag = "テイクアウト";
                                 }
                                 # コースメニューが入っているか否か
-                                elseif($o[24]=="コース"&&$o[28]>0){
+                                elseif($o[27]=="コース"&&$o[31]>0){
                                     $flag = "コース";
                                 }
                                 # フード/ドリンク
-                                if(in_array($o[24], $drink_arr)){
+                                if(in_array($o[27], $drink_arr)){
                                     $fd = "ドリンク";
                                 }
-                                $arr[$receipt_id][] = array(0=>$working_day, 1=>$receipt_id, 2=>$brand, 3=>$flag, 4=>$fd, 5=>$o[24], 6=>$o[25], 7=>$o[28], 8=>$o[29]);
+                                $arr[$receipt_id][] = [0=>$working_day, 1=>$receipt_id, 2=>$brand, 3=>$flag, 4=>$fd, 5=>$o[27], 6=>$o[28], 7=>$o[31], 8=>$o[32]];
                             }
                         }
                     }
@@ -263,39 +263,39 @@ class BreakdownsController extends AppController{
                             $flag = "アラカルト";
                             foreach($receipt_g as $r){
                                 # ランチメニューが入っているか否か
-                                if( ($r[24]=="ランチ"||$r[24]=="ランチドリンク") &&$r[28]>0){
+                                if( ($r[27]=="ランチ"||$r[27]=="ランチドリンク") &&$r[31]>0){
                                     $flag = "ランチ";
                                 }
                                 #  テイクアウトメニューが入っているか否か
-                                elseif($r[24]=="出前"&&$r[28]>0){
+                                elseif($r[27]=="出前"&&$r[31]>0){
                                     $flag = "テイクアウト";
                                 }
                                 # コースメニューが入っているか否か
-                                elseif($r[24]=="コース"&&$r[28]>0){
+                                elseif($r[27]=="コース"&&$r[31]>0){
                                     $flag = "コース";
                                 }
                                 # フード/ドリンク内訳
-                                if(in_array($r[24], $drink_arr)){
-                                    $drink+=$r[28]*$r[29];
+                                if(in_array($r[27], $drink_arr)){
+                                    $drink+=$r[31]*$r[32];
                                 }
                                 # 合計/小計/客数/売掛/金券/割引
                                 if($r[3]!=null){ $total = (int)$r[3]; }
                                 if($r[5]!=null){ $tax = (int)$r[5]; }
-                                if($r[18]!=null){ $visitor = (int)$r[18]; }
-                                if($r[19]!=null){ $quantity = (int)$r[19]; }
-                                if($r[14]!=null){ $credit = (int)$r[8]+(int)$r[9]+(int)$r[11]+(int)$r[14]; }
-                                if($r[13]!=null){ $voucher = (int)$r[13]; }
-                                if($r[17]!=null){ $discount = (int)$r[17]; }
+                                if($r[21]!=null){ $visitor = (int)$r[21]; }
+                                if($r[22]!=null){ $quantity = (int)$r[22]; }
+                                if($r[17]!=null){ $credit = (int)$r[8]+(int)$r[9]+(int)$r[11]+(int)$r[12]+(int)$r[13]+(int)$r[14]; }
+                                if($r[16]!=null){ $voucher = (int)$r[16]; }
+                                if($r[20]!=null){ $discount = (int)$r[20]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
-                                if($r[1]!=null&&$r[20]!=null){
-                                    $h = date("G", strtotime($r[20]));
-                                    $i = date("i", strtotime($r[20]));
-                                    $s = date("s", strtotime($r[20]));
+                                if($r[1]!=null&&$r[23]!=null){
+                                    $h = date("G", strtotime($r[23]));
+                                    $i = date("i", strtotime($r[23]));
+                                    $s = date("s", strtotime($r[23]));
                                     $visiting_time = date("Y-m-d H:i:s",strtotime($time."-$h hours -$i minutes -$s seconds"));
                                 }
                             }
                             if($total!=0){
-                                $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity);
+                                $arr[] = [0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity];
                             }
                         }
                     }
