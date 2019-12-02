@@ -283,7 +283,7 @@ class BreakdownsController extends AppController{
                                 if($r[5]!=null){ $tax = (int)$r[5]; }
                                 if($r[21]!=null){ $visitor = (int)$r[21]; }
                                 if($r[22]!=null){ $quantity = (int)$r[22]; }
-                                if($r[17]!=null){ $credit = (int)$r[8]+(int)$r[9]+(int)$r[11]+(int)$r[12]+(int)$r[13]+(int)$r[14]; }
+                                if($r[17]!=null){ $credit = (int)$r[8]+(int)$r[9]+(int)$r[11]+(int)$r[12]+(int)$r[13]+(int)$r[14]+(int)$r[17]; }
                                 if($r[16]!=null){ $voucher = (int)$r[16]; }
                                 if($r[20]!=null){ $discount = (int)$r[20]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
