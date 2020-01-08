@@ -59,7 +59,7 @@ class BreakdownsController extends AppController{
                                     # ドリンクカテゴリ
                                     $drink_arr = $this->init_categories($location);
                                     # 商品マート集計
-                                    $order_data = $this->order_group($shaped_records, $drink_arr, $brand);
+                                    #$order_data = $this->order_group($shaped_records, $drink_arr, $brand);
                                     # レシート毎集計
                                     $data = $this->group_array($shaped_records, $drink_arr, $brand);
                                 }
@@ -96,7 +96,7 @@ class BreakdownsController extends AppController{
                                     # CSV Rowデータ整形
                                     $shaped_records = $this->shape_array_postas($records);
                                     # 商品マート集計
-                                    $order_data = $this->order_group_postas($shaped_records);
+                                    #$order_data = $this->order_group_postas($shaped_records);
                                     # レシート毎集計
                                     $data = $this->group_array_postas($shaped_records);
                                 }
@@ -139,6 +139,7 @@ class BreakdownsController extends AppController{
                 }
             }
             # order_summaries DATA
+            /*
             if($order_data!=null){
                 foreach($order_data as $receipt_id => $ods){
                     # 既存レコード検索
@@ -166,6 +167,7 @@ class BreakdownsController extends AppController{
                     }
                 }
             }
+            */
             $this->Session->setFlash('Import完了しました');
             $this->redirect(array('controller'=>'locations', 'action'=>'index'));
         }
