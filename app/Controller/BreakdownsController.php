@@ -97,7 +97,7 @@ class BreakdownsController extends AppController{
                                     # 商品マート集計
                                     #$order_data = $this->order_group_postas($shaped_records);
                                     # レシート毎集計
-                                    $data = $this->group_array_postas($shaped_records);
+                                    $data = $this->group_array_postas($location, $shaped_records);
                                 }
                             }
                         }
@@ -203,53 +203,11 @@ class BreakdownsController extends AppController{
         return $arr;
     }
 
-    # Airレジカテゴリ設定を元にorderの振り分けを行う
-    private function order_group($shaped_records, $drink_arr, $brand){
-        $arr=[];
-        if($shaped_records!=null){
-            foreach($shaped_records as $working_day => $order){
-                if($order!=null){
-                    foreach($order as $receipt_id => $order_g){
-                        if($order_g!=null){
-                            foreach($order_g as $o){
-                                # init
-                                $flag = "アラカルト";
-                                $fd = "フード";
-                                # ランチメニューが入っているか否か
-                                if( ($o[27]=="ランチ"||$o[27]=="ランチドリンク") && $o[31]>0){
-                                    $flag = "ランチ";
-                                }
-                                #  テイクアウトメニューが入っているか否か
-                                elseif($o[27]=="出前"&&$o[31]>0){
-                                    $flag = "テイクアウト";
-                                }
-                                # コースメニューが入っているか否か
-                                elseif($o[27]=="コース"&&$o[31]>0){
-                                    $flag = "コース";
-                                }
-                                # フード/ドリンク
-                                if(in_array($o[27], $drink_arr)){
-                                    $fd = "ドリンク";
-                                }
-                                $arr[$receipt_id][] = [0=>$working_day, 1=>$receipt_id, 2=>$brand, 3=>$flag, 4=>$fd, 5=>$o[27], 6=>$o[28], 7=>$o[31], 8=>$o[32]];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $arr;
-    }
-
     # Airレジカテゴリ設定を元にレシートの振り分けを行う
     private function group_array($location, $shaped_records, $drink_arr, $brand){
         $arr=[];
         if($shaped_records!=null){
             foreach($shaped_records as $working_day => $receipt){
-
-            	debug($working_day);
-            	debug($receipt);
-
                 #レシート振り分け
                 if($receipt!=null){
                     foreach($receipt as $receipt_id => $receipt_g){
@@ -266,13 +224,11 @@ class BreakdownsController extends AppController{
                             $time = null;
                             $visiting_time = null;
                             $flag = "アラカルト";
+							$fd = "フード";
                             # order_summary 既存チェック
 							$order_summary = $this->OrderSummary->find('first', array(
 								'conditions' => array('OrderSummary.location_id'=>$location['Location']['id'], 'OrderSummary.receipt_id'=>$receipt_id)
 							));
-                            debug($order_summary);
-                            exit;
-
                             foreach($receipt_g as $r){
                             	# 20210508追記 消費税率カラムを参照し、店外売上を「テイクアウト」に割り振り
 								if($r[38]=="8%軽減"&&$r[31]>0){
@@ -288,6 +244,7 @@ class BreakdownsController extends AppController{
                                 }
                                 # フード/ドリンク内訳
                                 if(in_array($r[27], $drink_arr)){
+									$fd = "ドリンク";
                                     $drink+=$r[31]*$r[32];
                                 }
                                 # 合計/小計/客数/売掛/金券/割引
@@ -310,20 +267,19 @@ class BreakdownsController extends AppController{
 									# 新規インサート
 									$insert = array('OrderSummary' => array(
 										'location_id' => $location['Location']['id'],
-										'working_day' => $od[0],
-										'receipt_id' => $od[1],
-										'brand_name' => $od[2],
-										'breakdown_name' => $od[3],
-										'fd' => $od[4],
-										'category_name' => $od[5],
-										'menu_name' => $od[6],
-										'price' => $od[7],
-										'order_num' => $od[8],
+										'working_day' => $working_day,
+										'receipt_id' => $receipt_id,
+										'brand_name' => $brand,
+										'breakdown_name' => $flag,
+										'fd' => $fd,
+										'category_name' => $r[27],
+										'menu_name' => $r[28],
+										'price' => (int)$r[31],
+										'order_num' => (int)$r[32],
 									));
 									$this->OrderSummary->create(false);
 									$this->OrderSummary->save($insert);
 								}
-
                             }
                             if($total!=0){
                                 $arr[] = [0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity];
@@ -343,7 +299,7 @@ class BreakdownsController extends AppController{
         # 和香苑エリア卓番配列
         $arr2 = ['T51', 'T52', 'T53', 'T54', 'T55', 'T56', 'T57', 'T58', 'T59', 'T60', 'T65', 'T66', 'T67', 'T68', 'T70', 'T73', 'T74', 'T75', 'T76', 'T77', 'T78', 'T79', 'T80', 'T200'];
         # 配列判定
-        $table_number = mb_substr($r[14], 10, null,"UTF-8");
+        $table_number = mb_substr($r[15], 10, null,"UTF-8");
         if(in_array($table_number, $arr1)){
             $brand = "寿し和";
         }
@@ -351,7 +307,7 @@ class BreakdownsController extends AppController{
             $brand = "和香苑";
         }
         else{
-            $brand = null;
+            $brand = "寿し和";
         }
         return $brand;
     }
@@ -372,51 +328,8 @@ class BreakdownsController extends AppController{
         return $arr;
     }
 
-    # POS+用orderの振り分けを行う
-    private function order_group_postas($shaped_records){
-        $arr=[];
-        if($shaped_records!=null){
-            foreach($shaped_records as $working_day => $order){
-                if($order!=null){
-                    foreach($order as $receipt_id => $order_g){
-                        if($order_g!=null){
-                            foreach($order_g as $o){
-                                # init
-                                $brand = "寿し和";
-                                $flag = "アラカルト";
-                                # brand
-                                if(strpos($o[54],'寿し和')!==false){
-                                    $brand = "寿し和";
-                                }
-                                elseif(strpos($o[54],'和香苑')!==false){
-                                    $brand = "和香苑";
-                                }
-                                elseif(strpos($o[54],'ドリンク')!==false){
-                                    $brand = $this->judge_by_table_number($o);
-                                }
-                                else{}
-                                # breakdown
-                                if(strpos($o[55],'ランチ')!==false){
-                                    $flag = "ランチ";
-                                }
-                                elseif(strpos($o[55],'テイクアウト')!==false){
-                                    $flag = "テイクアウト";
-                                }
-                                elseif(strpos($o[55],'コース')!==false){
-                                    $flag = "コース";
-                                }
-                                $arr[$receipt_id][] = array(0=>$working_day, 1=>$receipt_id, 2=>$brand, 3=>$flag, 4=>$o[56], 5=>$o[57], 6=>$o[60], 7=>$o[64], 8=>$o[65]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return $arr;
-    }
-
     # POS+用レシートの振り分けを行う
-    private function group_array_postas($shaped_records){
+    private function group_array_postas($location, $shaped_records){
         $arr=[];
         if($shaped_records!=null){
             foreach($shaped_records as $working_day => $receipt){
@@ -437,39 +350,60 @@ class BreakdownsController extends AppController{
                             $visiting_time = null;
                             $brand = "寿し和";
                             $flag = "アラカルト";
+							$fd = "フード";
+							# order_summary 既存チェック
+							$order_summary = $this->OrderSummary->find('first', array(
+								'conditions' => array('OrderSummary.location_id'=>$location['Location']['id'], 'OrderSummary.receipt_id'=>$receipt_id)
+							));
                             foreach($receipt_g as $r){
                                 # ブランド切り分け
                                 $brand = $this->judge_by_table_number($r);
-                                if($brand==null){
-                                    if($r[54]=="寿し和"||$r[54]=="和香苑"){ $brand = $r[54]; }else{ $brand = "寿し和"; }
-                                }
+                                # 20210508 消費税率区分
+								if($r[26]==0 && $r[28]>0){
+									$flag = "テイクアウト";
+								}
                                 # ランチメニューが入っているか否か
-                                if(strpos($r[55],'ランチ')!==false && $r[64]>0){
+                                elseif(strpos($r[70],'ランチ')!==false && $r[79]>0){
                                     $flag = "ランチ";
                                 }
-                                #  テイクアウトメニューが入っているか否か
-                                elseif(strpos($r[55],'テイクアウト')!==false && $r[64]>0){
-                                    $flag = "テイクアウト";
-                                }
                                 # コースメニューが入っているか否か
-                                elseif(strpos($r[55],'コース')!==false && $r[64]>0){
+                                elseif(strpos($r[70],'コース')!==false && $r[79]>0){
                                     $flag = "コース";
                                 }
                                 # フード/ドリンク内訳
-                                if($r[56]=="ドリンク"){
-                                    $drink+=$r[64]*$r[65];
+                                if($r[71]=="ドリンク"){
+									$fd = "ドリンク";
+                                    $drink+=$r[79]*$r[81];
                                 }
                                 # 合計/小計/客数/売掛/金券/割引
-                                if($r[22]!=null){ $total = (int)$r[22]; }
-                                if($r[23]!=null){ $tax = (int)$r[23]; }
-                                if($r[15]!=null){ $visitor = (int)$r[15]; }
-                                if($r[21]!=null){ $quantity = (int)$r[21]; }
-                                if($r[30]!=null){ $credit = (int)$r[30]+(int)$r[32]; }
-                                if($r[31]!=null){ $voucher = (int)$r[31]; }
-                                if($r[28]!=null){ $discount = (int)$r[28]*-1; }
-                                if($r[35]!=null){ $other = (int)$r[35]; }
+                                if($r[24]!=null){ $total = (int)$r[24]; }
+                                if($r[25]!=null){ $tax = (int)$r[25]; }
+                                if($r[16]!=null){ $visitor = (int)$r[16]; }
+                                if($r[23]!=null){ $quantity = (int)$r[23]; }
+                                if($r[39]!=null){ $credit = (int)$r[39]+(int)$r[45]; }
+                                if($r[40]!=null){ $voucher = (int)$r[40]; }
+                                if($r[36]!=null){ $discount = (int)$r[36]*-1; }
+                                if($r[49]!=null){ $other = (int)$r[49]; }
                                 if($r[13]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
                                 if($r[12]!=null){ $visiting_time = date("Y-m-d H:i:s", strtotime("$r[12]")); }
+								# 20210508 order_summariesに追加
+								if($order_summary==null){
+									# 新規インサート
+									$insert = array('OrderSummary' => array(
+										'location_id' => $location['Location']['id'],
+										'working_day' => $working_day,
+										'receipt_id' => $receipt_id,
+										'brand_name' => $brand,
+										'breakdown_name' => $flag,
+										'fd' => $fd,
+										'category_name' => $r[72],
+										'menu_name' => $r[75],
+										'price' => (int)$r[79],
+										'order_num' => (int)$r[81],
+									));
+									$this->OrderSummary->create(false);
+									$this->OrderSummary->save($insert);
+								}
                             }
                             if($total!=0){
                                 $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity);
@@ -495,5 +429,87 @@ class BreakdownsController extends AppController{
             return $working_day;
         }
     }
+
+    # Airレジカテゴリ設定を元にorderの振り分けを行う
+	private function order_group($shaped_records, $drink_arr, $brand){
+		$arr=[];
+		if($shaped_records!=null){
+			foreach($shaped_records as $working_day => $order){
+				if($order!=null){
+					foreach($order as $receipt_id => $order_g){
+						if($order_g!=null){
+							foreach($order_g as $o){
+								# init
+								$flag = "アラカルト";
+								$fd = "フード";
+								# ランチメニューが入っているか否か
+								if( ($o[27]=="ランチ"||$o[27]=="ランチドリンク") && $o[31]>0){
+									$flag = "ランチ";
+								}
+								#  テイクアウトメニューが入っているか否か
+								elseif($o[27]=="出前"&&$o[31]>0){
+									$flag = "テイクアウト";
+								}
+								# コースメニューが入っているか否か
+								elseif($o[27]=="コース"&&$o[31]>0){
+									$flag = "コース";
+								}
+								# フード/ドリンク
+								if(in_array($o[27], $drink_arr)){
+									$fd = "ドリンク";
+								}
+								$arr[$receipt_id][] = [0=>$working_day, 1=>$receipt_id, 2=>$brand, 3=>$flag, 4=>$fd, 5=>$o[27], 6=>$o[28], 7=>$o[31], 8=>$o[32]];
+							}
+						}
+					}
+				}
+			}
+		}
+		return $arr;
+	}
+
+	# POS+用orderの振り分けを行う
+	private function order_group_postas($shaped_records){
+		$arr=[];
+		if($shaped_records!=null){
+			foreach($shaped_records as $working_day => $order){
+				if($order!=null){
+					foreach($order as $receipt_id => $order_g){
+						if($order_g!=null){
+							foreach($order_g as $o){
+								# init
+								$brand = "寿し和";
+								$flag = "アラカルト";
+								# brand
+								if(strpos($o[54],'寿し和')!==false){
+									$brand = "寿し和";
+								}
+								elseif(strpos($o[54],'和香苑')!==false){
+									$brand = "和香苑";
+								}
+								elseif(strpos($o[54],'ドリンク')!==false){
+									$brand = $this->judge_by_table_number($o);
+								}
+								else{}
+								# breakdown
+								if(strpos($o[55],'ランチ')!==false){
+									$flag = "ランチ";
+								}
+								elseif(strpos($o[55],'テイクアウト')!==false){
+									$flag = "テイクアウト";
+								}
+								elseif(strpos($o[55],'コース')!==false){
+									$flag = "コース";
+								}
+								$arr[$receipt_id][] = array(0=>$working_day, 1=>$receipt_id, 2=>$brand, 3=>$flag, 4=>$o[56], 5=>$o[57], 6=>$o[60], 7=>$o[64], 8=>$o[65]);
+							}
+						}
+					}
+				}
+			}
+		}
+		return $arr;
+	}
+
 
 }
