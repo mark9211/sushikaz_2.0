@@ -60,7 +60,7 @@ class BreakdownsController extends AppController{
                                     # 商品マート集計
                                     #$order_data = $this->order_group($shaped_records, $drink_arr, $brand);
                                     # レシート毎集計
-                                    $data = $this->group_array($shaped_records, $drink_arr, $brand);
+                                    $data = $this->group_array($location, $shaped_records, $drink_arr, $brand);
                                 }
                             }
                         }
@@ -242,14 +242,13 @@ class BreakdownsController extends AppController{
     }
 
     # Airレジカテゴリ設定を元にレシートの振り分けを行う
-    private function group_array($shaped_records, $drink_arr, $brand){
+    private function group_array($location, $shaped_records, $drink_arr, $brand){
         $arr=[];
         if($shaped_records!=null){
             foreach($shaped_records as $working_day => $receipt){
 
             	debug($working_day);
             	debug($receipt);
-				exit;
 
                 #レシート振り分け
                 if($receipt!=null){
@@ -267,6 +266,13 @@ class BreakdownsController extends AppController{
                             $time = null;
                             $visiting_time = null;
                             $flag = "アラカルト";
+                            # order_summary 既存チェック
+							$order_summary = $this->OrderSummary->find('first', array(
+								'conditions' => array('OrderSummary.location_id'=>$location['Location']['id'], 'OrderSummary.receipt_id'=>$receipt_id)
+							));
+                            debug($order_summary);
+                            exit;
+
                             foreach($receipt_g as $r){
                             	# 20210508追記 消費税率カラムを参照し、店外売上を「テイクアウト」に割り振り
 								if($r[38]=="8%軽減"&&$r[31]>0){
@@ -299,6 +305,25 @@ class BreakdownsController extends AppController{
                                     $s = date("s", strtotime($r[23]));
                                     $visiting_time = date("Y-m-d H:i:s",strtotime($time."-$h hours -$i minutes -$s seconds"));
                                 }
+								# 20210508 order_summariesに追加
+								if($order_summary==null){
+									# 新規インサート
+									$insert = array('OrderSummary' => array(
+										'location_id' => $location['Location']['id'],
+										'working_day' => $od[0],
+										'receipt_id' => $od[1],
+										'brand_name' => $od[2],
+										'breakdown_name' => $od[3],
+										'fd' => $od[4],
+										'category_name' => $od[5],
+										'menu_name' => $od[6],
+										'price' => $od[7],
+										'order_num' => $od[8],
+									));
+									$this->OrderSummary->create(false);
+									$this->OrderSummary->save($insert);
+								}
+
                             }
                             if($total!=0){
                                 $arr[] = [0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity];
