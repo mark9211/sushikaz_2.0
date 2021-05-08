@@ -243,10 +243,14 @@ class BreakdownsController extends AppController{
 
     # Airレジカテゴリ設定を元にレシートの振り分けを行う
     private function group_array($shaped_records, $drink_arr, $brand){
-    	debug($shaped_records);exit;
         $arr=[];
         if($shaped_records!=null){
             foreach($shaped_records as $working_day => $receipt){
+
+            	debug($working_day);
+            	debug($receipt);
+				exit;
+
                 #レシート振り分け
                 if($receipt!=null){
                     foreach($receipt as $receipt_id => $receipt_g){
