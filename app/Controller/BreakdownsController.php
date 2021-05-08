@@ -25,11 +25,10 @@ class BreakdownsController extends AppController{
             $data = [];
             $order_data = [];
             # 店舗条件分岐
-            if($location['Location']['name']=='池袋店'||$location['Location']['name']=='赤羽店'||$location['Location']['name']=='東池袋店'){
+			$location_name = $location['Location']['name'];
+            if($location_name=='池袋店'||$location_name=='赤羽店'||$location_name=='東池袋店'||$location_name=='池袋東武店'){
                 # brand
-                if($location['Location']['name']=='池袋店'||$location['Location']['name']=='赤羽店'){ $brand = '寿し和'; }
-                elseif($location['Location']['name']=='東池袋店'){ $brand = 'BATON'; }
-                else{ echo 'location error!';exit; }
+				$brand = $location['Location']['brand'];
                 # Airレジ出力CSV連携
                 if(mb_substr($name, 0, 4,"UTF-8")=='会計明細'){
                     #アップロード処理
@@ -68,7 +67,7 @@ class BreakdownsController extends AppController{
                     }
                 }
             }
-            elseif($location['Location']['name']=='和光店'){
+            elseif($location_name=='和光店'){
                 # POS+出力CSV連携
                 if(mb_substr($name, 15, 15,"UTF-8")=='general_purpose'){
                     #アップロード処理
@@ -244,6 +243,7 @@ class BreakdownsController extends AppController{
 
     # Airレジカテゴリ設定を元にレシートの振り分けを行う
     private function group_array($shaped_records, $drink_arr, $brand){
+    	debug($shaped_records);exit;
         $arr=[];
         if($shaped_records!=null){
             foreach($shaped_records as $working_day => $receipt){
@@ -264,13 +264,13 @@ class BreakdownsController extends AppController{
                             $visiting_time = null;
                             $flag = "アラカルト";
                             foreach($receipt_g as $r){
-                                # ランチメニューが入っているか否か
-                                if( ($r[27]=="ランチ"||$r[27]=="ランチドリンク") &&$r[31]>0){
+                            	# 20210508追記 消費税率カラムを参照し、店外売上を「テイクアウト」に割り振り
+								if($r[38]=="8%軽減"&&$r[31]>0){
+									$flag = "テイクアウト";
+								}
+								# ランチメニューが入っているか否か
+                                elseif( ($r[27]=="ランチ"||$r[27]=="ランチドリンク") && $r[31]>0 ){
                                     $flag = "ランチ";
-                                }
-                                #  テイクアウトメニューが入っているか否か
-                                elseif($r[27]=="出前"&&$r[31]>0){
-                                    $flag = "テイクアウト";
                                 }
                                 # コースメニューが入っているか否か
                                 elseif($r[27]=="コース"&&$r[31]>0){
@@ -286,7 +286,7 @@ class BreakdownsController extends AppController{
                                 if($r[21]!=null){ $visitor = (int)$r[21]; }
                                 if($r[22]!=null){ $quantity = (int)$r[22]; }
                                 if($r[17]!=null){ $credit = (int)$r[8]+(int)$r[9]+(int)$r[11]+(int)$r[12]+(int)$r[13]+(int)$r[14]+(int)$r[17]; }
-                                if($r[16]!=null){ $voucher = (int)$r[16]; }
+                                if($r[16]!=null){ $voucher = (int)$r[10]+(int)$r[15]+(int)$r[16]; }
                                 if($r[20]!=null){ $discount = (int)$r[20]; }
                                 if($r[1]!=null&&$r[2]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[1] $r[2]")); }
                                 if($r[1]!=null&&$r[23]!=null){
