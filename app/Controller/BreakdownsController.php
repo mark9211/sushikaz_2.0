@@ -263,6 +263,7 @@ class BreakdownsController extends AppController{
                                     $visiting_time = date("Y-m-d H:i:s",strtotime($time."-$h hours -$i minutes -$s seconds"));
                                 }
 								# 20210508 order_summariesに追加
+								/*
 								if($order_summary==null){
 									# 新規インサート
 									$insert = array('OrderSummary' => array(
@@ -280,6 +281,7 @@ class BreakdownsController extends AppController{
 									$this->OrderSummary->create(false);
 									$this->OrderSummary->save($insert);
 								}
+								*/
                             }
                             if($total!=0){
                                 $arr[] = [0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity];
@@ -387,6 +389,7 @@ class BreakdownsController extends AppController{
                                 if($r[13]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
                                 if($r[12]!=null){ $visiting_time = date("Y-m-d H:i:s", strtotime("$r[12]")); }
 								# 20210508 order_summariesに追加
+								/*
 								if($order_summary==null){
 									# 新規インサート
 									$insert = array('OrderSummary' => array(
@@ -404,6 +407,7 @@ class BreakdownsController extends AppController{
 									$this->OrderSummary->create(false);
 									$this->OrderSummary->save($insert);
 								}
+								*/
                             }
                             if($total!=0){
                                 $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity);
