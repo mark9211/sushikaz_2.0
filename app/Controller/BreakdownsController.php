@@ -58,7 +58,7 @@ class BreakdownsController extends AppController{
                                     # ドリンクカテゴリ
                                     $drink_arr = $this->init_categories($location);
                                     # 商品マート集計
-                                    #$order_data = $this->order_group($shaped_records, $drink_arr, $brand);
+                                    # $order_data = $this->order_group($shaped_records, $drink_arr, $brand);
                                     # レシート毎集計
                                     $data = $this->group_array($location, $shaped_records, $drink_arr, $brand);
                                 }
@@ -95,7 +95,7 @@ class BreakdownsController extends AppController{
                                     # CSV Rowデータ整形
                                     $shaped_records = $this->shape_array_postas($records);
                                     # 商品マート集計
-                                    #$order_data = $this->order_group_postas($shaped_records);
+                                    # $order_data = $this->order_group_postas($shaped_records);
                                     # レシート毎集計
                                     $data = $this->group_array_postas($location, $shaped_records);
                                 }
@@ -387,6 +387,7 @@ class BreakdownsController extends AppController{
                                 if($r[13]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
                                 if($r[12]!=null){ $visiting_time = date("Y-m-d H:i:s", strtotime("$r[12]")); }
 								# 20210508 order_summariesに追加
+								/*
 								if($order_summary==null){
 									# 新規インサート
 									$insert = array('OrderSummary' => array(
@@ -404,6 +405,7 @@ class BreakdownsController extends AppController{
 									$this->OrderSummary->create(false);
 									$this->OrderSummary->save($insert);
 								}
+								*/
                             }
                             if($total!=0){
                                 $arr[] = array(0=>$working_day, 1=>$receipt_id, 2=>$total, 3=>$tax, 4=>$visitor, 5=>$brand, 6=>$flag, 7=>$total-$drink, 8=>$drink, 9=>$credit, 10=>$voucher, 11=>$discount, 12=>$time, 13=>$other, 14=>$visiting_time, 15=>$quantity);
