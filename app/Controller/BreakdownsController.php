@@ -367,15 +367,15 @@ class BreakdownsController extends AppController{
 									$flag = "テイクアウト";
 								}
                                 # ランチメニューが入っているか否か
-                                elseif(strpos($r[70],'ランチ')!==false && $r[79]>0){
+                                elseif(strpos($r[66],'ランチ')!==false && $r[75]>0){
                                     $flag = "ランチ";
                                 }
                                 # コースメニューが入っているか否か
-                                elseif(strpos($r[70],'コース')!==false && $r[79]>0){
+                                elseif(strpos($r[66],'コース')!==false && $r[75]>0){
                                     $flag = "コース";
                                 }
                                 # フード/ドリンク内訳
-                                if($r[71]=="ドリンク"){
+                                if($r[68]=="ドリンク"){
 									$fd = "ドリンク";
                                     $drink+=$r[79]*$r[81];
                                 }
@@ -384,10 +384,10 @@ class BreakdownsController extends AppController{
                                 if($r[25]!=null){ $tax = (int)$r[25]; }
                                 if($r[16]!=null){ $visitor = (int)$r[16]; }
                                 if($r[23]!=null){ $quantity = (int)$r[23]; }
-                                if($r[39]!=null){ $credit = (int)$r[39]+(int)$r[45]; }
+                                if($r[39]!=null){ $credit = (int)$r[39]+(int)$r[41]; }
                                 if($r[40]!=null){ $voucher = (int)$r[40]; }
                                 if($r[36]!=null){ $discount = (int)$r[36]*-1; }
-                                if($r[49]!=null){ $other = (int)$r[49]; }
+                                if($r[46]!=null){ $other = (int)$r[46]; }
                                 if($r[13]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
                                 if($r[12]!=null){ $visiting_time = date("Y-m-d H:i:s", strtotime("$r[12]")); }
 								# 20210508 order_summariesに追加
