@@ -138,6 +138,7 @@ class BreakdownsController extends AppController{
                 }
             }
             # order_summaries DATA
+			/*
             if($order_data!=null){
                 foreach($order_data as $receipt_id => $ods){
                     # 既存レコード検索
@@ -165,6 +166,7 @@ class BreakdownsController extends AppController{
                     }
                 }
             }
+            */
             $this->Session->setFlash('Import完了しました');
             $this->redirect(array('controller'=>'locations', 'action'=>'index'));
         }
@@ -224,9 +226,11 @@ class BreakdownsController extends AppController{
                             $flag = "アラカルト";
 							$fd = "フード";
                             # order_summary 既存チェック
+							/*
 							$order_summary = $this->OrderSummary->find('first', array(
 								'conditions' => array('OrderSummary.location_id'=>$location['Location']['id'], 'OrderSummary.receipt_id'=>$receipt_id)
 							));
+							*/
                             foreach($receipt_g as $r){
                             	# 20210508追記 消費税率カラムを参照し、店外売上を「テイクアウト」に割り振り
 								if($r[38]=="8%軽減"&&$r[31]>0){
