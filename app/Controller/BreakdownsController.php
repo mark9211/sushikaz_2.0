@@ -353,7 +353,7 @@ class BreakdownsController extends AppController{
                             $time = null;
                             $visiting_time = null;
                             $brand = "寿し和";
-                            $flag = "アラカルト";
+                            $flag = $this->judgeLunchDinner($working_day);
 							$fd = "フード";
 							# order_summary 既存チェック
 							$order_summary = $this->OrderSummary->find('first', array(
