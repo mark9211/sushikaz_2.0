@@ -223,7 +223,7 @@ class BreakdownsController extends AppController{
                             $quantity = 0;
                             $time = null;
                             $visiting_time = null;
-                            $flag = "アラカルト";
+                            $flag = $this->judgeLunchDinner($working_day);
 							$fd = "フード";
                             # order_summary 既存チェック
 							/*
@@ -435,6 +435,17 @@ class BreakdownsController extends AppController{
             return $working_day;
         }
     }
+
+	# ランチ・ディナージャッジ ＊引数（文字列）
+	private function judgeLunchDinner($now){
+    	$flag = 'アラカルト';
+		#時刻
+		$hour = date('G', strtotime($now));
+		if ($hour > 8 && $hour < 16) {
+			$flag = 'ランチ';
+		}
+		return $flag;
+	}
 
     # Airレジカテゴリ設定を元にorderの振り分けを行う
 	private function order_group($shaped_records, $drink_arr, $brand){
