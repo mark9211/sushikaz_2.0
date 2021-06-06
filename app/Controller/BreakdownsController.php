@@ -356,9 +356,11 @@ class BreakdownsController extends AppController{
                             $flag = $this->judgeLunchDinner($working_day);
 							$fd = "フード";
 							# order_summary 既存チェック
+							/*
 							$order_summary = $this->OrderSummary->find('first', array(
 								'conditions' => array('OrderSummary.location_id'=>$location['Location']['id'], 'OrderSummary.receipt_id'=>$receipt_id)
 							));
+							*/
                             foreach($receipt_g as $r){
                                 # ブランド切り分け
                                 $brand = $this->judge_by_table_number($r);
