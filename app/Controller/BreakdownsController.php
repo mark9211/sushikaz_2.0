@@ -369,27 +369,27 @@ class BreakdownsController extends AppController{
 									$flag = "テイクアウト";
 								}
                                 # ランチメニューが入っているか否か
-                                elseif(strpos($r[66],'ランチ')!==false && $r[75]>0){
+                                elseif(strpos($r[67],'ランチ')!==false && $r[76]>0){
                                     $flag = "ランチ";
                                 }
                                 # コースメニューが入っているか否か
-                                elseif(strpos($r[66],'コース')!==false && $r[75]>0){
+                                elseif(strpos($r[67],'コース')!==false && $r[76]>0){
                                     $flag = "コース";
                                 }
                                 # フード/ドリンク内訳
-                                if($r[68]=="ドリンク"){
+                                if($r[69]=="ドリンク"){
 									$fd = "ドリンク";
-                                    $drink+=$r[79]*$r[81];
+                                    $drink+=$r[76]*$r[78];
                                 }
                                 # 合計/小計/客数/売掛/金券/割引
                                 if($r[24]!=null){ $total = (int)$r[24]; }
                                 if($r[25]!=null){ $tax = (int)$r[25]; }
                                 if($r[16]!=null){ $visitor = (int)$r[16]; }
                                 if($r[23]!=null){ $quantity = (int)$r[23]; }
-                                if($r[39]!=null){ $credit = (int)$r[39]+(int)$r[41]; }
-                                if($r[40]!=null){ $voucher = (int)$r[40]; }
+                                if($r[40]!=null){ $credit = (int)$r[40]+(int)$r[42]; }
+                                if($r[41]!=null){ $voucher = (int)$r[41]; }
                                 if($r[36]!=null){ $discount = (int)$r[36]*-1; }
-                                if($r[46]!=null){ $other = (int)$r[46]; }
+                                if($r[47]!=null){ $other = (int)$r[47]; }
                                 if($r[13]!=null){ $time = date("Y-m-d H:i:s", strtotime("$r[13]")); }
                                 if($r[12]!=null){ $visiting_time = date("Y-m-d H:i:s", strtotime("$r[12]")); }
 								# 20210508 order_summariesに追加
